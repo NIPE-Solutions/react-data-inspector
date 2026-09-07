@@ -86,8 +86,8 @@ header {
   color: var(--muted);
 }
 .brand-mark {
-  color: var(--accent);
-  font-size: 27px;
+  display: block;
+  flex: none;
 }
 header nav {
   display: flex;

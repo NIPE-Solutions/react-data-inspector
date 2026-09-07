@@ -67,7 +67,14 @@ export function Playground() {
       </a>
       <header>
         <a className="brand" href="/">
-          <span className="brand-mark">⌘</span> React Data Inspector
+          <img
+            className="brand-mark"
+            src="/logo.svg"
+            width="32"
+            height="32"
+            alt=""
+          />
+          <span>React Data Inspector</span>
         </a>
         <nav aria-label="Main">
           <a href="/#docs">Documentation</a>
@@ -174,7 +181,9 @@ export function Playground() {
         </div>
       </main>
       <footer>
-        <a href="https://oss.nipesolutions.com">NIPE Open Source</a>
+        <a href="https://opensource.nipesolutions.com">
+          Part of NIPE Open Source
+        </a>
         <p>Focused primitives. Application-owned data.</p>
       </footer>
     </>

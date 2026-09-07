@@ -102,13 +102,15 @@ export function App() {
         Skip to content
       </a>
       <header>
-        <a className="brand" href="#">
-          <span className="brand-mark" aria-hidden="true">
-            ⌘
-          </span>
-          <span>
-            NIPE <b>Open Source</b>
-          </span>
+        <a className="brand" href="/">
+          <img
+            className="brand-mark"
+            src="/logo.svg"
+            width="32"
+            height="32"
+            alt=""
+          />
+          <span>React Data Inspector</span>
         </a>
         <nav aria-label="Main">
           <a href="/playground">Playground</a>
@@ -123,9 +125,7 @@ export function App() {
         <section className="hero">
           <div className="hero-copy">
             <div className="project-name">
-              <span className="tree-mark" aria-hidden="true">
-                ├<br />└
-              </span>
+              <img src="/logo.svg" width="24" height="24" alt="" />
               React Data Inspector <span className="version">Alpha</span>
             </div>
             <h1>
@@ -393,8 +393,8 @@ export function App() {
         </section>
       </main>
       <footer>
-        <a className="brand" href="https://oss.nipesolutions.com">
-          NIPE Open Source
+        <a href="https://opensource.nipesolutions.com">
+          Part of NIPE Open Source
         </a>
         <p>A focused primitive. Independently installable. MIT licensed.</p>
         <a href="#main">Back to top ↑</a>

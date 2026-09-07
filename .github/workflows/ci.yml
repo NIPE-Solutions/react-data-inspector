@@ -1,5 +1,8 @@
 name: Verify
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -27,3 +30,14 @@ jobs:
           path: |
             test-results/
             benchmarks/results.json
+
+  verify:
+    name: Verified
+    if: always()
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every React version to pass
+        env:
+          RESULT: ${{ needs.test.result }}
+        run: test "$RESULT" = success
