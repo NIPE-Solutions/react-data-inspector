@@ -185,6 +185,8 @@ it('starts previous-result navigation at the last match', async () => {
     'third: "needle"',
   )
 })
+// This correctness fixture constructs 10,000 jsdom rows before client windowing.
+// Its runtime on shared CI hardware is not a browser performance budget.
 it('reports unavailable rather than selecting a result past the visible-row budget', async () => {
   const many = Array.from({ length: 1000 }, () =>
     Object.fromEntries(Array.from({ length: 10 }, (_, i) => ['k' + i, i])),
@@ -212,4 +214,4 @@ it('reports unavailable rather than selecting a result past the visible-row budg
       'This result cannot be revealed within the inspection limits.',
     ),
   ).toBeInTheDocument()
-})
+}, 15000)
