@@ -9,3 +9,5 @@ playwright-report/
 website/dist-profiling/
 .vercel/
 .env*
+
+.website-ssr/

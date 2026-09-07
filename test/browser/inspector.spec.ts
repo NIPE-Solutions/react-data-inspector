@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
+  await page.locator('.json-disclosure > summary').click()
 })
 test('keyboard navigation, selection and actions restore focus', async ({
   page,

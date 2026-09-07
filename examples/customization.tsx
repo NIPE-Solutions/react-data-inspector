@@ -5,6 +5,7 @@ import {
   formatPath,
   type DataPath,
   type InspectorSlotProps,
+  type InspectorNodeContext,
 } from '../src'
 export class Money {
   constructor(
@@ -31,6 +32,7 @@ export function PlusToggle({ expanded }: InspectorSlotProps) {
 export function ControlledExample() {
   const [expanded, setExpanded] = useState<readonly DataPath[]>([[]])
   const [selected, setSelected] = useState<DataPath | null>(null)
+  const [details, setDetails] = useState<InspectorNodeContext | null>(null)
   return (
     <div className="controlled-example">
       <div>
@@ -42,12 +44,23 @@ export function ControlledExample() {
           expandedPaths={expanded}
           onExpandedPathsChange={setExpanded}
           selectedPath={selected}
-          onSelectedPathChange={setSelected}
+          onSelectedPathChange={(path, node) => {
+            setSelected(path)
+            setDetails(node)
+          }}
         />
       </div>
       <aside aria-label="Selected node details">
         <span>Selected path</span>
         <code>{selected ? formatPath(selected) : 'Select a node'}</code>
+        <span>Expanded paths</span>
+        <code>{expanded.map(formatPath).join(', ') || 'None'}</code>
+        <span>Selected value</span>
+        <code>
+          {details
+            ? `${details.type}: ${details.summary}`
+            : 'Your application receives the path and node context.'}
+        </code>
       </aside>
     </div>
   )

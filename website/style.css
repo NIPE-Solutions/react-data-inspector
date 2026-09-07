@@ -335,6 +335,7 @@ pre {
 .brand-colors {
   --rdi-background: #f7fbf9;
   --rdi-string-color: #206246;
+  --rdi-number-color: #934b08;
   --rdi-focus-ring: #1d664c;
 }
 .design-system {

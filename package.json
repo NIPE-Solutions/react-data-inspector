@@ -42,18 +42,20 @@
   "scripts": {
     "dev": "vite --config website/vite.config.ts",
     "build": "vite build && dts-bundle-generator --project tsconfig.build.json --no-banner -o dist/index.d.ts src/index.ts && node scripts/copy-css.mjs",
-    "build:website": "vite build --config website/vite.config.ts",
+    "build:website": "node scripts/build-website.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:package": "node scripts/verify-package.mjs",
     "benchmark": "tsx benchmarks/run.ts",
-    "check": "npm run format:check && npm run typecheck && npm test && npm run build && npm run build:website && npm run test:package",
+    "check": "npm run format:check && npm run typecheck && npm test && npm run build && npm run build:website && npm run test:website && npm run test:package",
     "benchmark:memory": "node --expose-gc --import tsx benchmarks/memory.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "benchmark:browser": "node benchmarks/browser.mjs",
-    "build:website:profile": "vite build --config website/vite.config.ts --mode profiling"
+    "build:website:profile": "vite build --config website/vite.config.ts --mode profiling",
+    "preview:website": "vite preview --config website/vite.config.ts --host 127.0.0.1 --port 5173 --strictPort",
+    "test:website": "node scripts/verify-website.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
@@ -65,6 +67,7 @@
     "@types/react-dom": "^19.2.0",
     "dts-bundle-generator": "9.5.1",
     "jsdom": "^27.0.0",
+    "marked": "^18.0.11",
     "prettier": "3.9.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -82,5 +85,20 @@
       "playwright-core": "1.58.2"
     }
   },
-  "types": "./dist/index.d.ts"
+  "types": "./dist/index.d.ts",
+  "homepage": "https://react-data-inspector.nipesolutions.com",
+  "keywords": [
+    "react",
+    "typescript",
+    "json",
+    "json-viewer",
+    "json-inspector",
+    "json-tree",
+    "data-inspector",
+    "object-inspector",
+    "tree-view",
+    "developer-tools",
+    "debugging",
+    "react-component"
+  ]
 }

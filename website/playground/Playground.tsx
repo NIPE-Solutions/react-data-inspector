@@ -77,7 +77,9 @@ export function Playground() {
           <span>React Data Inspector</span>
         </a>
         <nav aria-label="Main">
-          <a href="/#docs">Documentation</a>
+          <a href="/docs/installation">Install</a>
+          <a href="/playground">Playground</a>
+          <a href="/docs">Documentation</a>
           <a href="https://github.com/NIPE-Solutions/react-data-inspector">
             GitHub
           </a>
@@ -93,7 +95,7 @@ export function Playground() {
               then take the code.
             </p>
           </div>
-          <span className="version">Private preview</span>
+          <span className="version">Alpha preview</span>
         </div>
         <div className="lab-layout">
           <aside className="lab-nav">

@@ -12,3 +12,5 @@ for size in 16 32 48 180 192 512; do
   rsvg-convert -w "$size" -h "$size" website/public/logo.svg -o "website/public/$name.png"
 done
 magick website/public/favicon-16.png website/public/favicon-32.png website/public/favicon-48.png website/public/favicon.ico
+
+rsvg-convert website/public/social.svg -o website/public/social.png

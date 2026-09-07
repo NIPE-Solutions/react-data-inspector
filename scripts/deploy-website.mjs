@@ -61,7 +61,11 @@ const settings = {
 }
 assets.push({
   file: 'vercel.json',
-  data: JSON.stringify({ ...settings, rewrites: config.rewrites }),
+  data: JSON.stringify({
+    ...settings,
+    cleanUrls: config.cleanUrls,
+    trailingSlash: config.trailingSlash,
+  }),
   encoding: 'utf-8',
 })
 const project = await api(

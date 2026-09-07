@@ -15,7 +15,7 @@ Assessed 2026-09-07. Version: 0.1.0-alpha.0. The package is not published to npm
 - Runnable customization cases for CSS-only brand colors, toggle-only replacement, added application actions, Money, unstyled mode, controlled expansion and adjacent selection details.
 - Repeatable model, SSR, search, browser interaction and model-lifetime benchmarks with raw output and methodology.
 
-The local harness has 74 unit/component tests and 21 browser cases per engine (63 runs), including search during random updates every 50 ms. Both React 18.3.1 and 19.2.8 passed the full local suites; CI also defines the matrix for both peers. Those local executions are evidence, not a claim that a remote CI run has completed.
+The harness has 76 unit/component tests and 25 browser cases per engine (75 runs), including search during random updates every 50 ms, static documentation without JavaScript, website hydration and mobile layouts. The expanded website suite passed locally with React 19.2.8. CI runs the full checks for React 18.3.1 and 19; use the commit-specific workflow result as remote verification evidence. The website build also verifies 22 static routes and compiles 18 documentation examples.
 
 The browser runner is pinned to Playwright 1.58.2 to support the WebKit build available on this macOS host. A newer runner failed before opening a page with an unsupported WebKit protocol setting. This is not evidence of current Safari/iOS support; current-browser CI and actual mobile Safari checks remain necessary.
 
@@ -43,6 +43,6 @@ Editing, add/remove proposals, JSON Patch conversion, collection continuation, p
 
 ## Naming and publication
 
-The existing private GitHub repository is `NIPE-Solutions/react-data-inspector`, matching this checkout's origin. The npm registry returned 404 for `@nipe-solutions/react-data-inspector` on 2026-09-07. The name follows neighboring NIPE packages; it is not reserved and publication permission has not been proven by a publish attempt.
+The public GitHub repository is `NIPE-Solutions/react-data-inspector`, matching this checkout's origin. The npm registry returned 404 for `@nipe-solutions/react-data-inspector` on 2026-09-07. The name follows neighboring NIPE packages; it is not reserved and publication permission has not been proven by a publish attempt.
 
-`react-data-inspector.nipesolutions.com` follows the NIPE docs-host pattern. Its GoDaddy CNAME points to the Vercel project in the NIPE Solutions team. GitHub Actions deploys `website/dist` from `main` after both React verification jobs pass. The repository remains private, and the npm package remains unpublished. Website publication does not raise the library release classification.
+`react-data-inspector.nipesolutions.com` follows the NIPE docs-host pattern. Its GoDaddy CNAME points to the Vercel project in the NIPE Solutions team. GitHub Actions deploys `website/dist` from `main` after both React verification jobs pass. The repository is public; the npm package remains unpublished. Website publication does not raise the library release classification.

@@ -1,21 +1,19 @@
-import { StrictMode, lazy, Suspense } from 'react'
-import { createRoot } from 'react-dom/client'
-import { App } from './App'
-const Playground = lazy(() =>
-  import('./playground/Playground').then((module) => ({
-    default: module.Playground,
-  })),
-)
+import { StrictMode } from 'react'
+import { createRoot, hydrateRoot } from 'react-dom/client'
+import { Site } from './Site'
+import { metadata } from './site/metadata'
 import '../src/styles.css'
 import './style.css'
-createRoot(document.getElementById('root')!).render(
+import './story.css'
+const path = location.pathname.replace(/\/$/, '') || '/'
+const root = document.getElementById('root')!
+const app = (
   <StrictMode>
-    {location.pathname.replace(/\/$/, '') === '/playground' ? (
-      <Suspense fallback={<p>Loading playground…</p>}>
-        <Playground />
-      </Suspense>
-    ) : (
-      <App />
-    )}
-  </StrictMode>,
+    <Site path={path} />
+  </StrictMode>
 )
+if (root.hasChildNodes()) hydrateRoot(root, app)
+else {
+  document.title = metadata(path).title
+  createRoot(root).render(app)
+}

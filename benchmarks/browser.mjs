@@ -32,6 +32,7 @@ try {
   const samples = []
   for (let i = 0; i < 5; i++) {
     await page.goto('http://127.0.0.1:5174')
+    await page.locator('.json-disclosure > summary').click()
     const tree = page.getByRole('tree', { name: 'Playground inspector' })
     const start = performance.now()
     await tree.getByRole('button', { name: 'Expand user' }).click()
