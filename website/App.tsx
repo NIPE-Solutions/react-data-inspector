@@ -18,10 +18,6 @@ export function App() {
       <main id="main">
         <section className="hero">
           <div className="hero-copy">
-            <div className="project-name">
-              <img src="/logo.svg" width="24" height="24" alt="" />
-              React Data Inspector <span className="version">Alpha</span>
-            </div>
             <h1>
               Inspect the object
               <br />
