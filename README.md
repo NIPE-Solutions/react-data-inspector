@@ -2,7 +2,7 @@
 
 A structured JavaScript data inspector for React: inspect the value you actually have.
 
-**Alpha, not yet published.** Run `npm install && npm run dev` for the live documentation and playground. See [release readiness](docs/release-readiness.md) before production adoption.
+**Alpha package, not yet published to npm.** [Website](https://react-data-inspector.nipesolutions.com) · [Playground](https://react-data-inspector.nipesolutions.com/playground). Run `npm install && npm run dev` locally. See [release readiness](docs/release-readiness.md) before production adoption.
 
 ```tsx
 import { DataInspector } from '@nipe-solutions/react-data-inspector'

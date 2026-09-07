@@ -2,7 +2,7 @@
 
 Classification: **PRIVATE PREVIEW READY**
 
-Assessed 2026-09-07. Version: 0.1.0-alpha.0. Not published to npm or deployed to the intended public hostname.
+Assessed 2026-09-07. Version: 0.1.0-alpha.0. The package is not published to npm. Website hosting and automatic deployment are configured separately; see [deployment](deployment.md).
 
 ## Verified
 
@@ -45,4 +45,4 @@ Editing, add/remove proposals, JSON Patch conversion, collection continuation, p
 
 The existing private GitHub repository is `NIPE-Solutions/react-data-inspector`, matching this checkout's origin. The npm registry returned 404 for `@nipe-solutions/react-data-inspector` on 2026-09-07. The name follows neighboring NIPE packages; it is not reserved and publication permission has not been proven by a publish attempt.
 
-`react-data-inspector.nipesolutions.com` follows the NIPE docs-host pattern but returned NXDOMAIN at the naming check. The site is runnable locally and builds to `website/dist`; no DNS, hosting assignment, npm publication or remote Git push was performed.
+`react-data-inspector.nipesolutions.com` follows the NIPE docs-host pattern. Its GoDaddy CNAME points to the Vercel project in the NIPE Solutions team. GitHub Actions deploys `website/dist` from `main` after both React verification jobs pass. The repository remains private, and the npm package remains unpublished. Website publication does not raise the library release classification.
