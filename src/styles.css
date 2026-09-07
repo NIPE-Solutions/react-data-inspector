@@ -239,3 +239,8 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+:where([data-rdi-root]:not([data-rdi-unstyled]) [data-rdi-delimiter]),
+:where([data-rdi-root]:not([data-rdi-unstyled]) [data-rdi-annotation]) {
+  color: var(--rdi-muted);
+}

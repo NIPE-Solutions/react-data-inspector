@@ -7,6 +7,9 @@ export function JsonInput() {
     items: [1, 2, 3],
   })
   const [error, setError] = useState('')
+  const [presentation, setPresentation] = useState<'inspector' | 'classic'>(
+    'inspector',
+  )
   return (
     <>
       <div className="lab-intro">
@@ -39,7 +42,20 @@ export function JsonInput() {
         <button type="submit">Inspect JSON</button>
         <p role="alert">{error}</p>
       </form>
+      <label className="json-presentation">
+        Presentation{' '}
+        <select
+          value={presentation}
+          onChange={(event) =>
+            setPresentation(event.target.value as 'inspector' | 'classic')
+          }
+        >
+          <option value="inspector">Inspector</option>
+          <option value="classic">Classic</option>
+        </select>
+      </label>
       <DataInspector
+        presentation={presentation}
         value={value}
         searchable
         theme="light"

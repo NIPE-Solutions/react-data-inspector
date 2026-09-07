@@ -4,8 +4,19 @@ import { marked, type Tokens } from 'marked'
 import { articles, type Article } from '../articles'
 import { Header, Footer, Installation } from './Chrome'
 import { Markdown, headingId } from './Markdown'
-import { CustomizationWorkshop } from '../home/ExistingDemos'
+import { TypeMuseum } from '../home/TypeMuseum'
+import { createDocumentationSearch } from './doc-search'
 import { KeyboardModel } from '../home/Visuals'
+const searchDocumentation = createDocumentationSearch(articles)
+const groups = [
+  'Getting started',
+  'Core behavior',
+  'Concepts',
+  'Customization',
+  'Reference',
+  'Quality',
+  'Migration',
+]
 export function Documentation({ article }: { article: Article }) {
   const [filter, setFilter] = useState('')
   const [navigationOpen, setNavigationOpen] = useState(true)
@@ -13,7 +24,7 @@ export function Documentation({ article }: { article: Article }) {
     if (window.matchMedia('(max-width: 760px)').matches)
       setNavigationOpen(false)
   }, [])
-  const groups = [...new Set(articles.map((item) => item.group))]
+  const results = searchDocumentation(filter)
   const headings = marked
     .lexer(article.content)
     .filter(
@@ -33,26 +44,37 @@ export function Documentation({ article }: { article: Article }) {
           >
             Browse documentation
           </button>
-          <label htmlFor="doc-filter">Find a topic</label>
+          <label htmlFor="doc-filter">Search documentation</label>
           <input
             id="doc-filter"
             type="search"
-            placeholder="Search documentation…"
+            placeholder="Search titles and content…"
             value={filter}
             onChange={(event) => setFilter(event.currentTarget.value)}
           />
+          {filter.trim() && (
+            <div className="doc-search-results">
+              <p role="status">
+                {results.length
+                  ? `${results.length} pages found`
+                  : 'No matching pages'}
+              </p>
+              <ul aria-label="Documentation search results">
+                {results.map((result) => (
+                  <li key={result.path}>
+                    <a href={result.path}>{result.title}</a>
+                    <p>{result.excerpt}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <nav id="doc-navigation" aria-label="Documentation">
             {groups.map((group) => (
               <div key={group}>
                 <h2>{group}</h2>
                 {articles
-                  .filter(
-                    (item) =>
-                      item.group === group &&
-                      (item.title + ' ' + item.description)
-                        .toLowerCase()
-                        .includes(filter.toLowerCase()),
-                  )
+                  .filter((item) => item.group === group)
                   .map((item) => (
                     <a
                       key={item.path}
@@ -87,9 +109,7 @@ export function Documentation({ article }: { article: Article }) {
           {article.path === '/accessibility' && <KeyboardModel />}
           <Markdown source={article.content} />
           {article.path === '/performance' && <BenchmarkEvidence />}
-          {article.path === '/guides/customization' && (
-            <CustomizationWorkshop />
-          )}
+          {article.path === '/concepts/javascript-types' && <TypeMuseum />}
           <div className="doc-next">
             <a href="/playground">Try it in the playground</a>
             <a href="/reference/api">API reference</a>

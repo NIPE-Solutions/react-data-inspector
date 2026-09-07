@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { Legal } from './site/Legal'
 import { App } from './App'
 import { articles } from './articles'
 import { Documentation } from './site/Documentation'
@@ -37,6 +38,8 @@ function PlaygroundRoute() {
 export function Site({ path }: { path: string }) {
   const route = path.replace(/\/$/, '') || '/'
   if (route === '/') return <App />
+  if (route === '/imprint' || route === '/privacy')
+    return <Legal kind={route === '/imprint' ? 'imprint' : 'privacy'} />
   if (route === '/playground') return <PlaygroundRoute />
   const article = articles.find((item) => item.path === route)
   if (article) return <Documentation article={article} />

@@ -1,3 +1,4 @@
+import { Header, Footer } from '../site/Chrome'
 import { useState, type CSSProperties } from 'react'
 import { DataInspector, type DataPath, formatPath } from '../../src'
 import { moneyType, PlusToggle } from '../../examples/customization'
@@ -62,29 +63,7 @@ export function Playground() {
   }
   return (
     <>
-      <a className="skip" href="#lab-main">
-        Skip to playground
-      </a>
-      <header>
-        <a className="brand" href="/">
-          <img
-            className="brand-mark"
-            src="/logo.svg"
-            width="32"
-            height="32"
-            alt=""
-          />
-          <span>React Data Inspector</span>
-        </a>
-        <nav aria-label="Main">
-          <a href="/docs/installation">Install</a>
-          <a href="/playground">Playground</a>
-          <a href="/docs">Documentation</a>
-          <a href="https://github.com/NIPE-Solutions/react-data-inspector">
-            GitHub
-          </a>
-        </nav>
-      </header>
+      <Header main="lab-main" />
       <main id="lab-main" className="lab-main">
         <div className="lab-heading">
           <div>
@@ -182,12 +161,7 @@ export function Playground() {
           </div>
         </div>
       </main>
-      <footer>
-        <a href="https://opensource.nipesolutions.com">
-          Part of NIPE Open Source
-        </a>
-        <p>Focused primitives. Application-owned data.</p>
-      </footer>
+      <Footer />
     </>
   )
 }
@@ -226,6 +200,9 @@ function Workbench({
     }
   }
   if (data.key !== key) setData(makeData())
+  const [presentation, setPresentation] = useState<'inspector' | 'classic'>(
+    'inspector',
+  )
   const [metrics, setMetrics] = useState(false)
   const [mounted, setMounted] = useState(true)
   const [generation, setGeneration] = useState(0)
@@ -282,6 +259,18 @@ function Workbench({
         </p>
       </div>
       <div className="lab-controls">
+        <label>
+          Presentation
+          <select
+            value={presentation}
+            onChange={(e) =>
+              setPresentation(e.target.value as 'inspector' | 'classic')
+            }
+          >
+            <option value="inspector">Inspector</option>
+            <option value="classic">Classic</option>
+          </select>
+        </label>
         {section === 'scenarios' && (
           <label>
             Scenario
@@ -526,6 +515,7 @@ function Workbench({
       >
         {mounted ? (
           <DataInspector
+            presentation={presentation}
             key={key}
             value={data.value}
             searchable
@@ -583,7 +573,7 @@ function Workbench({
         <Source code={designSystemCss} title="Design-system CSS" />
       )}
       <Source
-        code={`import { DataInspector } from '@nipe-solutions/react-data-inspector'\nimport '@nipe-solutions/react-data-inspector/styles.css'\n\nexport function Example({ value }: { value: unknown }) {\n  return <DataInspector value={value} searchable theme="${appearance === 'dark' ? 'dark' : 'light'}"\n    density="${compact ? 'compact' : 'comfortable'}"\n    searchOptions={{ scope: '${queryMode}', maxNodes: ${budget} }}\n    inspectionOptions={{ maxDepth: ${depth} }}\n    arrayGrouping={{ threshold: 1000, size: ${group} }}\n    virtualization={${virtual ? "'auto'" : 'false'}}${appearance === 'unstyled' ? '\n    unstyled className="design-system"' : appearance === 'brand' ? '\n    className="my-inspector"' : ''} />\n}`}
+        code={`import { DataInspector } from '@nipe-solutions/react-data-inspector'\nimport '@nipe-solutions/react-data-inspector/styles.css'\n\nexport function Example({ value }: { value: unknown }) {\n  return <DataInspector value={value} presentation="${presentation}" searchable theme="${appearance === 'dark' ? 'dark' : 'light'}"\n    density="${compact ? 'compact' : 'comfortable'}"\n    searchOptions={{ scope: '${queryMode}', maxNodes: ${budget} }}\n    inspectionOptions={{ maxDepth: ${depth} }}\n    arrayGrouping={{ threshold: 1000, size: ${group} }}\n    virtualization={${virtual ? "'auto'" : 'false'}}${appearance === 'unstyled' ? '\n    unstyled className="design-system"' : appearance === 'brand' ? '\n    className="my-inspector"' : ''} />\n}`}
         title="Basic configuration source"
       />
       <Source

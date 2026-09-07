@@ -23,7 +23,7 @@ export function IdentityDiagram() {
         <p>
           {relation === 'shared'
             ? 'Two paths. One object. Changing the original is visible through both references.'
-            : 'A reference back into its own ancestor chain. Following it recursively would never finish.'}
+            : 'Follow self in the inspector below to return to the root.'}
         </p>
       </div>
       <svg

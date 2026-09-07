@@ -11,6 +11,7 @@ import type { DataInspectorProps, InspectorSlotProps } from './contracts'
 import type { InspectorMessages } from './messages'
 import { formatPath, pathEqual } from './model/path'
 import { SlotBoundary } from './SlotBoundary'
+import { ClassicKey, ClassicSummary, Delimiter } from './presentation'
 interface Props {
   rows: readonly Node[]
   props: DataInspectorProps
@@ -112,6 +113,7 @@ export function Tree({
     else if (bounds.bottom > frame.top + tree.clientHeight)
       tree.scrollTop += bounds.bottom - frame.top - tree.clientHeight
   }, [activeIndex, height, treeRef])
+  const classic = props.presentation === 'classic'
   const typeAhead = useRef({ text: '', time: 0 })
   function keyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (e.target !== e.currentTarget) return
@@ -264,7 +266,13 @@ export function Tree({
                   fallback={m.rendererFailed}
                   resetKey={[node, Key]}
                 >
-                  {Key ? <Key {...slot} /> : m.nodeLabel(node)}
+                  {Key ? (
+                    <Key {...slot} />
+                  ) : classic ? (
+                    <ClassicKey node={node} label={m.nodeLabel(node)} />
+                  ) : (
+                    m.nodeLabel(node)
+                  )}
                 </SlotBoundary>
               </span>
               <span data-rdi-separator aria-hidden="true">
@@ -290,10 +298,25 @@ export function Tree({
                     </button>
                   ) : Value ? (
                     <Value {...slot} />
+                  ) : classic && !node.customType ? (
+                    <ClassicSummary
+                      node={node}
+                      text={text}
+                      empty={
+                        slot.expanded &&
+                        !children.has(node.id) &&
+                        // The final row at the traversal budget may have
+                        // children that did not fit in the visible row set.
+                        (index < rows.length - 1 || rows.length < 10000)
+                      }
+                    />
                   ) : (
                     text
                   )}
                 </SlotBoundary>
+                {classic && !node.synthetic && node.position < node.setSize && (
+                  <Delimiter kind="comma">,</Delimiter>
+                )}
               </span>
             </div>
           ) : (

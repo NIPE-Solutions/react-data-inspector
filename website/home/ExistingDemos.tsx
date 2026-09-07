@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { DataInspector } from '../../src'
 import {
-  ControlledExample,
   customizationValue,
   moneyType,
   PlusToggle,
@@ -43,7 +42,6 @@ const scenarios: Record<string, unknown> = {
     }),
     { jobId: 'job_42', retryable: true },
   ),
-  '500,000 items': null,
   'JavaScript values': {
     missing: undefined,
     large: 9007199254740993n,
@@ -70,7 +68,6 @@ function Code({ children }: { children: string }) {
 import { IdentityDiagram, CustomizationLayers } from './Visuals'
 export function ScenarioDemo() {
   const [demo, setDemo] = useState('Object graph')
-  const [large, setLarge] = useState<number[]>([])
   return (
     <section id="playground" className="section">
       <div className="section-intro">
@@ -87,65 +84,52 @@ export function ScenarioDemo() {
           <select
             id="scenario"
             value={demo}
-            onChange={(e) => {
-              const next = e.currentTarget.value
-              if (next === '500,000 items' && !large.length)
-                setLarge(Array.from({ length: 500000 }, (_, i) => i))
-              setDemo(next)
-            }}
+            onChange={(e) => setDemo(e.currentTarget.value)}
           >
             {Object.keys(scenarios).map((s) => (
               <option key={s}>{s}</option>
             ))}
           </select>
-          <span>
-            {demo === '500,000 items'
-              ? 'Grouped on demand'
-              : 'Keyboard navigation enabled'}
-          </span>
+          <span>Keyboard navigation enabled</span>
         </div>
         <DataInspector
           key={demo}
-          value={demo === '500,000 items' ? large : scenarios[demo]}
+          value={scenarios[demo]}
           searchable
           theme="light"
           aria-label="Playground inspector"
         />
       </div>
+      <p className="section-link">
+        <a href="/playground?section=json">
+          Want to try your own data? Open the full Playground →
+        </a>
+      </p>
     </section>
   )
 }
 export function CustomizationWorkshop() {
+  const [presentation, setPresentation] = useState<'inspector' | 'classic'>(
+    'inspector',
+  )
   const [mode, setMode] = useState('Colors only'),
     [action, setAction] = useState('')
-  const modes = [
-    'Colors only',
-    'Dark',
-    'Compact',
-    'Unstyled',
-    'Custom type',
-    'Custom actions',
-    'Toggle',
-    'Controlled selection',
-  ]
   const modeCode =
-    mode === 'Controlled selection'
-      ? '<DataInspector value={data}\n  selectedPath={selected}\n  onSelectedPathChange={setSelected} />'
-      : mode === 'Colors only'
-        ? '<DataInspector value={data} className="brand-colors" />'
-        : mode === 'Custom type'
-          ? '<DataInspector value={data} types={[moneyType]} />'
-          : mode === 'Custom actions'
-            ? '<DataInspector value={data} actions={[openEntityAction]} />'
-            : mode === 'Toggle'
-              ? '<DataInspector value={data} components={{ Toggle: PlusToggle }} />'
-              : mode === 'Unstyled'
-                ? '<DataInspector value={data} unstyled className="design-system" />'
-                : mode === 'Dark'
-                  ? '<DataInspector value={data} theme="dark" />'
-                  : mode === 'Compact'
-                    ? '<DataInspector value={data} density="compact" />'
-                    : '<DataInspector value={data} />'
+    mode === 'Colors only'
+      ? '<DataInspector value={data} className="brand-colors" />'
+      : mode === 'Custom type'
+        ? '<DataInspector value={data} types={[moneyType]} />'
+        : mode === 'Custom actions'
+          ? '<DataInspector value={data} actions={[openEntityAction]} />'
+          : mode === 'Toggle'
+            ? '<DataInspector value={data} components={{ Toggle: PlusToggle }} />'
+            : mode === 'Unstyled'
+              ? '<DataInspector value={data} unstyled className="design-system" />'
+              : mode === 'Dark'
+                ? '<DataInspector value={data} theme="dark" />'
+                : mode === 'Compact'
+                  ? '<DataInspector value={data} density="compact" />'
+                  : '<DataInspector value={data} />'
   return (
     <section id="customize" className="section customization">
       <div className="section-intro">
@@ -155,35 +139,61 @@ export function CustomizationWorkshop() {
           Keep the rest.
         </h2>
         <p>
-          Start with the default. Change only what you need. Styling should not
-          require render props; domain behavior should not require a fork.
+          Adjust the appearance or connect application behavior. Each example
+          changes only the relevant public API.
         </p>
       </div>
       <CustomizationLayers />
-      <div
-        className="mode-tabs"
-        role="group"
-        aria-label="Customization examples"
-      >
-        {modes.map((name) => (
-          <button
-            key={name}
-            aria-pressed={mode === name}
-            onClick={() => {
-              setMode(name)
-              setAction('')
-            }}
+      <div className="workshop-controls">
+        <div className="mode-tabs" role="group" aria-label="Presentation">
+          <span>Presentation</span>
+          {(['inspector', 'classic'] as const).map((name) => (
+            <button
+              key={name}
+              aria-pressed={presentation === name}
+              onClick={() => setPresentation(name)}
+            >
+              {name === 'classic' ? 'Classic' : 'Inspector'}
+            </button>
+          ))}
+        </div>
+        {[
+          {
+            label: 'Appearance',
+            choices: ['Colors only', 'Dark', 'Compact', 'Unstyled'],
+          },
+          {
+            label: 'Extensions',
+            choices: ['Custom type', 'Custom actions', 'Toggle'],
+          },
+        ].map(({ label, choices }) => (
+          <div
+            key={label}
+            className="mode-tabs"
+            role="group"
+            aria-label={label}
           >
-            {name}
-          </button>
+            <span>{label}</span>
+            {choices.map((name) => (
+              <button
+                key={name}
+                aria-pressed={mode === name}
+                onClick={() => {
+                  setMode(name)
+                  setAction('')
+                }}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
         ))}
       </div>
       <div className="custom-demo">
-        {mode === 'Controlled selection' ? (
-          <ControlledExample />
-        ) : (
+        {
           <DataInspector
             key={mode}
+            presentation={presentation}
             value={customizationValue}
             theme={mode === 'Dark' ? 'dark' : 'light'}
             density={mode === 'Compact' ? 'compact' : 'comfortable'}
@@ -214,14 +224,21 @@ export function CustomizationWorkshop() {
             }
             aria-label="Customization inspector"
           />
-        )}
+        }
         <div className="code-panel">
           <span>
             {mode === 'Unstyled'
               ? 'Your design system. Our behavior.'
               : 'The change is this small.'}
           </span>
-          <Code>{modeCode}</Code>
+          <Code>
+            {presentation === 'classic'
+              ? modeCode.replace(
+                  'value={data}',
+                  'value={data} presentation="classic"',
+                )
+              : modeCode}
+          </Code>
           {mode === 'Colors only' && (
             <Code>
               {
@@ -239,51 +256,6 @@ export function CustomizationWorkshop() {
         Simple customization should remain simple. Deep customization should not
         require a fork. <a href="/guides/customization">Explore every layer</a>
       </p>
-    </section>
-  )
-}
-export function JsonDemo() {
-  const [input, setInput] = useState('{"name":"Nicholas","active":true}'),
-    [json, setJson] = useState<unknown>({ name: 'Nicholas', active: true }),
-    [error, setError] = useState('')
-  return (
-    <section className="section json-section">
-      <div>
-        <h2>Try your own JSON.</h2>
-        <p>
-          Paste JSON here. Use the predefined examples above for values JSON
-          cannot represent.
-        </p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            try {
-              setJson(JSON.parse(input))
-              setError('')
-            } catch {
-              setError('Invalid JSON. Check quotes, commas and brackets.')
-            }
-          }}
-        >
-          <label htmlFor="json">JSON input</label>
-          <textarea
-            id="json"
-            value={input}
-            onChange={(e) => setInput(e.currentTarget.value)}
-            spellCheck={false}
-          />
-          <button className="primary" type="submit">
-            Inspect JSON
-          </button>
-          <span role="alert">{error}</span>
-        </form>
-      </div>
-      <DataInspector
-        value={json}
-        searchable
-        theme="light"
-        aria-label="JSON input inspector"
-      />
     </section>
   )
 }

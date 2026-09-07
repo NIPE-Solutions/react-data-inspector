@@ -32,7 +32,6 @@ try {
   const samples = []
   for (let i = 0; i < 5; i++) {
     await page.goto('http://127.0.0.1:5174')
-    await page.locator('.json-disclosure > summary').click()
     const tree = page.getByRole('tree', { name: 'Playground inspector' })
     const start = performance.now()
     await tree.getByRole('button', { name: 'Expand user' }).click()
@@ -52,13 +51,14 @@ try {
       .click()
     await tree.locator('[data-selected=true]').waitFor()
     const searchRevealMs = performance.now() - searchStart
+    await page.goto('http://127.0.0.1:5174/playground?section=json')
     await page
       .getByLabel('JSON input', { exact: true })
       .fill(JSON.stringify(Array.from({ length: 1000 }, (_, i) => i)))
     await page
       .getByRole('button', { name: 'Inspect JSON', exact: true })
       .click()
-    const virtual = page.getByRole('tree', { name: 'JSON input inspector' })
+    const virtual = page.getByRole('tree', { name: 'JSON inspector' })
     await virtual.focus()
     const scrollStart = performance.now()
     await virtual.press('End')

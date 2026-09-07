@@ -38,4 +38,18 @@ export function Example() {
 }
 ```
 
-`children` is lazy, synchronous, counted, and paged. Return only the requested slice with stable unique keys. Custom child paths use the type ID and key; they are not JSON properties. Matchers, summaries, sources, and search callbacks should be pure and bounded. Failures become inspection diagnostics, but work inside a callback cannot be interrupted.
+## Children and paging
+
+`children` is lazy, synchronous, counted, and paged. Its source declares a count and returns the requested slice through `getPage(offset, limit)`. Use stable unique keys. Avoid constructing an entire large collection merely to return a small page.
+
+## Paths and search text
+
+Custom child paths use the type ID and child key. They are rich inspector addresses, not ordinary JSON properties, and cannot be represented as JSON Pointers. See [paths](/concepts/paths).
+
+Supply `searchText` when the domain value has meaningful searchable text beyond its summary or children. Keep the returned text bounded; the inspector does not need an arbitrary object serializer.
+
+## Execution and failure boundaries
+
+Matchers, summaries, child sources, and search callbacks are application code. Keep them pure, synchronous where required, and bounded. Failures become inspection diagnostics, but work inside a callback cannot be interrupted.
+
+A type adapter works with either [presentation](/guides/presentation). It supplies domain meaning without replacing tree navigation, selection, copy actions, or row rendering. Use a [slot](/guides/customization#replace-only-a-toggle) when the change concerns content rendering rather than type semantics.

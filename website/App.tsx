@@ -3,14 +3,10 @@ import { Header, Footer, Code, Installation } from './site/Chrome'
 import {
   ScenarioDemo,
   CustomizationWorkshop,
-  JsonDemo,
   graph,
 } from './home/ExistingDemos'
 import { JsonContrast, SafeInspection, LargeData } from './home/Proofs'
-import { TypeMuseum } from './home/TypeMuseum'
 import { Products, Ownership } from './home/Products'
-import { KeyboardModel } from './home/Visuals'
-import { Comparison } from './home/Comparison'
 export function App() {
   return (
     <>
@@ -59,63 +55,64 @@ export function App() {
             </div>
           </div>
         </section>
-        <nav className="chapter-nav" aria-label="Product story">
-          <a href="#beyond-json">Beyond JSON</a>
-          <a href="#playground">Object identity</a>
-          <a href="#safe-inspection">Safe inspection</a>
-          <a href="#types">Type museum</a>
-          <a href="#large-data">Large data</a>
-          <a href="#customize">Customization</a>
-        </nav>
+        <dl className="principles" aria-label="Design principles">
+          <div>
+            <dt>Graph-aware</dt>
+            <dd>Values and identity, together.</dd>
+          </div>
+          <div>
+            <dt>Application-owned</dt>
+            <dd>Your data. Your state.</dd>
+          </div>
+          <div>
+            <dt>CSS-first</dt>
+            <dd>Style one layer at a time.</dd>
+          </div>
+        </dl>
         <JsonContrast />
         <ScenarioDemo />
         <SafeInspection />
-        <TypeMuseum />
         <LargeData />
         <CustomizationWorkshop />
-        <Products />
         <Ownership />
-        <section className="section" id="keyboard">
-          <div className="section-intro">
-            <h2>
-              Navigate the data.
-              <br />
-              Keep your keyboard.
-            </h2>
+        <Products />
+        <aside className="keyboard-proof" aria-label="Accessibility evidence">
+          <h2>Keep your keyboard.</h2>
+          <p>
+            Arrow keys navigate. Enter activates. Space selects. F2 opens
+            actions.
+          </p>
+          <p>
+            Keyboard and axe checks run in Chromium, Firefox and WebKit. Manual
+            screen-reader audits remain outstanding.
+          </p>
+          <a href="/accessibility">Keyboard model and audit status →</a>
+        </aside>
+        <section className="section community">
+          <h2>
+            Like where this is going?
+            <br />
+            Help it grow.
+          </h2>
+          <div>
             <p>
-              One tree navigation tab stop. Separate focus and selection.
-              Explicit ownership for nested and windowed tree items.
+              React Data Inspector is free, open source, and we're only getting
+              started. Give it a star and help more developers find it.
+            </p>
+            <a
+              className="star-link"
+              href="https://github.com/NIPE-Solutions/react-data-inspector"
+            >
+              ★ Star React Data Inspector on GitHub ↗
+            </a>
+            <p className="annotation">
+              Have a real-world edge case?{' '}
+              <a href="https://github.com/NIPE-Solutions/react-data-inspector/issues">
+                Bring it to the issue tracker.
+              </a>
             </p>
           </div>
-          <div className="split-proof">
-            <KeyboardModel />
-            <div>
-              <h3>Behavior you can try here.</h3>
-              <p>
-                Tab to any inspector. Arrow keys move focus without selecting.
-                Space selects; Enter opens a branch or follows a reference. F2
-                opens actions for the focused node.
-              </p>
-              <p>
-                Search controls and actions have their own normal tab stops.
-                Windowed trees retain active descendants and their ancestry.
-              </p>
-              <p className="evidence-note">
-                Keyboard interactions and axe checks run in Chromium, Firefox
-                and WebKit. Manual VoiceOver and NVDA audits are still
-                outstanding; screen-reader compatibility is not yet claimed.
-              </p>
-              <a href="/accessibility">
-                Accessibility evidence and audit status
-              </a>
-            </div>
-          </div>
         </section>
-        <Comparison />
-        <details className="json-disclosure">
-          <summary>Have JSON ready? Inspect it here.</summary>
-          <JsonDemo />
-        </details>
         <section className="section onward" id="docs">
           <h2>
             A focused primitive.

@@ -7,7 +7,7 @@ const sitemap = await readFile('website/dist/sitemap.xml', 'utf8')
 const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(
   (match) => match[1],
 )
-if (urls.length < 22) throw Error('Missing documentation routes')
+if (urls.length < 29) throw Error('Missing documentation routes')
 const pages = new Map()
 for (const url of urls) {
   const path = new URL(url).pathname
@@ -20,6 +20,8 @@ for (const url of urls) {
     throw Error(`Wrong canonical: ${path}`)
   for (const selector of [
     'title',
+    'meta[name=theme-color]',
+    'link[rel=icon]',
     'meta[name=description]',
     'meta[property="og:title"]',
     'meta[property="og:image"]',
@@ -27,13 +29,20 @@ for (const url of urls) {
     'script[type="application/ld+json"]',
   ])
     if (!doc.querySelector(selector)) throw Error(`${path} missing ${selector}`)
+  for (const legal of ['/imprint', '/privacy']) {
+    if (!doc.querySelector(`footer a[href="${legal}"]`))
+      throw Error(`Missing legal footer link: ${path}`)
+  }
   pages.set(path, doc)
 }
 if (new Set([...pages.values()].map((doc) => doc.title)).size !== pages.size)
   throw Error('Duplicate page titles')
 for (const [path, doc] of pages) {
   for (const anchor of doc.querySelectorAll('a[href]')) {
-    const url = new URL(anchor.getAttribute('href'), base + path)
+    const href = anchor.getAttribute('href')
+    if (!href || href === '#' || href.startsWith('javascript:'))
+      throw Error(`Placeholder link: ${path}`)
+    const url = new URL(href, base + path)
     if (url.origin !== base) continue
     const target = url.pathname
     if (pages.has(target)) {

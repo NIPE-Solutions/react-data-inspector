@@ -15,7 +15,7 @@ Assessed 2026-09-07. Version: 0.1.0-alpha.0. The package is not published to npm
 - Runnable customization cases for CSS-only brand colors, toggle-only replacement, added application actions, Money, unstyled mode, controlled expansion and adjacent selection details.
 - Repeatable model, SSR, search, browser interaction and model-lifetime benchmarks with raw output and methodology.
 
-The harness has 76 unit/component tests and 25 browser cases per engine (75 runs), including search during random updates every 50 ms, static documentation without JavaScript, website hydration and mobile layouts. The expanded website suite passed locally with React 19.2.8. CI runs the full checks for React 18.3.1 and 19; use the commit-specific workflow result as remote verification evidence. The website build also verifies 22 static routes and compiles 18 documentation examples.
+The harness covers unit/component behavior and browser interactions, including search during random updates every 50 ms, documentation without JavaScript, website hydration, classic presentation, legal routes, documentation content search, and mobile layouts. CI runs the full checks for React 18.3.1 and 19; use the commit-specific workflow result and test summaries as current verification evidence. The website build verifies every indexed route and compiles the public documentation examples. Counts are reported by the tools rather than fixed here as the suite grows.
 
 The browser runner is pinned to Playwright 1.58.2 to support the WebKit build available on this macOS host. A newer runner failed before opening a page with an unsupported WebKit protocol setting. This is not evidence of current Safari/iOS support; current-browser CI and actual mobile Safari checks remain necessary.
 
@@ -39,7 +39,7 @@ The forced-GC experiment observed all 50 discarded model roots collected. It doe
 
 ## Deferred features
 
-Editing, add/remove proposals, JSON Patch conversion, collection continuation, prototype inspection and specialized binary/DOM views are not implemented. There is no editing prop that implies otherwise. The [API document](api.md#editing-design) records the immutable proposal boundary.
+Editing, add/remove proposals, JSON Patch conversion, collection continuation, prototype inspection and specialized binary/DOM views are not implemented. There is no editing prop that implies otherwise. See the current [public API](api.md) and [limitations](https://react-data-inspector.nipesolutions.com/limitations).
 
 ## Naming and publication
 

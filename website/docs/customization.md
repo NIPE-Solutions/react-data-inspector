@@ -1,6 +1,19 @@
-## Theme with the public CSS contract
+## Choose the smallest layer
 
-Start with CSS variables and stable data attributes, then replace only the content that needs application knowledge. `className` and `style` reach the root; `theme` accepts `light`, `dark`, or `system`; `density` accepts `compact` or `comfortable`.
+Visual changes and domain behavior use different extension points. Start with the layer that owns your change; replacing a value summary should not require reimplementing tree navigation.
+
+| Change                                 | Extension point                            |
+| -------------------------------------- | ------------------------------------------ |
+| Color, font, spacing                   | CSS variables                              |
+| A selected or typed value's appearance | Stable data attributes                     |
+| Classic object-viewer notation         | `presentation`                             |
+| One icon or content region             | `components` slots                         |
+| A domain value's meaning               | `types` registry                           |
+| An application operation               | `actions`                                  |
+| Application coordination               | Controlled expansion, selection, and query |
+| Every visual rule                      | `unstyled` and application CSS             |
+
+## Change colors with CSS
 
 ```css
 .billing-inspector {
@@ -13,41 +26,49 @@ Start with CSS variables and stable data attributes, then replace only the conte
 }
 ```
 
-The public tokens are `--rdi-font-family`, `--rdi-font-size`, `--rdi-line-height`, `--rdi-background`, `--rdi-foreground`, `--rdi-muted`, the key/string/number/boolean/null/special color tokens, `--rdi-row-height`, `--rdi-indent`, `--rdi-radius`, `--rdi-border-color`, and the hover/selected/focus interaction tokens. Defaults use zero-specificity selectors, so a class on the inspector can override them directly.
+Apply `className="billing-inspector"` to the inspector. Root `className` and `style` are normal React styling hooks. The [styling reference](/reference/styling) owns the complete token and attribute contract.
 
-Stable presence hooks are `data-rdi-root`, `data-rdi-tree`, `data-rdi-node`, `data-rdi-key`, `data-rdi-value`, `data-rdi-toggle`, `data-rdi-actions`, `data-rdi-reference`, `data-rdi-search`, `data-rdi-footer`, `data-rdi-unstyled`, and `data-rdi-match`. Stable state attributes are `data-type`, `data-depth`, `data-expanded`, `data-selected`, `data-focused`, `data-theme`, and `data-density`. Treat DOM nesting and class names as private.
+Use `theme="light"`, `theme="dark"`, or the default `theme="system"` for built-in color preferences. `density` chooses `compact` or `comfortable`. [Presentation](/guides/presentation) is independent from both.
 
-## Slots, actions, and controlled state
+## Replace only a toggle
 
 ```tsx
-import { useState } from 'react'
 import {
   DataInspector,
-  type DataPath,
   type InspectorSlotProps,
 } from '@nipe-solutions/react-data-inspector'
 
 const Toggle = ({ expanded }: InspectorSlotProps) => (
   <span>{expanded ? '−' : '+'}</span>
 )
-export function Customized() {
-  const [selectedPath, setSelectedPath] = useState<DataPath | null>(null)
+
+export function CustomToggle() {
+  return <DataInspector value={{ user: { id: 42 } }} components={{ Toggle }} />
+}
+```
+
+The library still owns the toggle button and tree interaction. Other slots are `Key`, `Value`, `Reference`, and `Actions`. They replace content, not the behavior engine. Preserve accessible names and avoid adding extra row tab stops.
+
+## Extend application actions
+
+```tsx
+import { useState } from 'react'
+import { DataInspector, formatPath } from '@nipe-solutions/react-data-inspector'
+
+export function InvoiceActions() {
   const [openedPath, setOpenedPath] = useState('No node opened')
   return (
     <section>
       <DataInspector
-        className="billing-inspector"
-        value={{ invoice: 'INV-42' }}
-        components={{ Toggle }}
+        value={{ invoice: { id: 'INV-42' } }}
         actions={[
           {
             id: 'open-in-application',
             label: 'Open in application',
-            onAction: (node) => setOpenedPath(JSON.stringify(node.path)),
+            when: (node) => node.label === 'invoice',
+            onAction: (node) => setOpenedPath(formatPath(node.path)),
           },
         ]}
-        selectedPath={selectedPath}
-        onSelectedPathChange={setSelectedPath}
       />
       <aside aria-live="polite">Application panel: {openedPath}</aside>
     </section>
@@ -55,10 +76,18 @@ export function Customized() {
 }
 ```
 
-Slots also include `Key`, `Value`, `Reference`, and `Actions`. Preserve tree semantics and avoid extra row tab stops. `types` adds domain adapters.
+The action is added alongside default copy actions. It receives readonly node context and no mutation helpers. Use stable unique action IDs. See [API reference](/reference/api#slots-and-custom-actions) for asynchronous actions and failure behavior.
 
-## Own every visual rule with `unstyled`
+## Add domain meaning or controlled behavior
 
-`unstyled` removes all default appearance selectors while retaining semantics, keyboard behavior, and data attributes. Your CSS must provide tree overflow, uniform single-line row geometry and indentation, visible focus and selection, controls, action feedback, and value differentiation. The current virtualizer needs a uniform row height; set `virtualization={false}` if custom rows wrap or vary in height. Grouping and the visible-row limit still apply.
+A [custom type](/guides/custom-types) supplies a value summary and optional paged children without replacing the row renderer. [Controlled state](/guides/controlled-state) coordinates the inspector with other application panels.
 
-The website's complete [`.design-system` unstyled example](https://github.com/NIPE-Solutions/react-data-inspector/blob/main/website/style.css#L340-L388) is a working starting point. Copy it into application CSS and keep the `className="design-system"` scope, or adapt every selector to your own root class.
+These are separate responsibilities: use actions to invoke an operation, types to describe a value, and controlled props to own state.
+
+## Own appearance with unstyled
+
+`unstyled` removes default appearance while retaining semantics, state, keyboard behavior, and stable attributes. Supply your own overflow, row geometry, indentation, controls, visible focus, selection, and value differentiation.
+
+The current virtualizer requires uniform row heights. Disable virtualization if application CSS introduces wrapping or variable heights; grouping and visible-model limits remain. The [styling reference](/reference/styling#unstyled-responsibilities) lists those responsibilities.
+
+Try the [customization playground](/playground?section=customization), including a complete unstyled example and copyable CSS. This guide explains extension boundaries; the playground owns the experiment controls.

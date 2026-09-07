@@ -81,6 +81,8 @@ export interface InspectorNodeContext {
   }
 }
 export interface Node extends InspectorNodeContext {
+  /** Internal provenance; a registered ID alone does not imply a match. */
+  readonly customType?: boolean
   readonly id: string
   readonly parentId: string | null
   readonly address: DataPath

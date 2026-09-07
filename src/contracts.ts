@@ -36,6 +36,7 @@ export interface InspectorComponents {
 }
 export interface DataInspectorProps {
   readonly value: unknown
+  readonly presentation?: 'inspector' | 'classic'
   readonly defaultExpandedDepth?: number
   readonly defaultExpandedPaths?: readonly DataPath[]
   readonly expandedPaths?: readonly DataPath[]

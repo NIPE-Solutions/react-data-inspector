@@ -16,6 +16,18 @@ test('homepage proofs use actual values and safe inspection', async ({
   await expect(safe.locator('.inspection-counters')).toHaveText(
     'Getter calls 0Function calls 0Promise subscriptions 0',
   )
+  expect(
+    await page
+      .getByRole('tree', { name: 'Half million values' })
+      .locator('[data-rdi-node]')
+      .count(),
+  ).toBeLessThan(110)
+})
+
+test('type museum belongs to the JavaScript concepts page', async ({
+  page,
+}) => {
+  await page.goto('/concepts/javascript-types')
   await page
     .getByRole('button', { name: 'Opaque by design', exact: true })
     .click()
@@ -23,12 +35,6 @@ test('homepage proofs use actual values and safe inspection', async ({
   await expect(museum).toContainText('Promise')
   await expect(museum).toContainText('ReactElement')
   await expect(museum).toContainText('HTMLDivElement')
-  expect(
-    await page
-      .getByRole('tree', { name: 'Half million values' })
-      .locator('[data-rdi-node]')
-      .count(),
-  ).toBeLessThan(110)
 })
 
 test('documentation is rendered without JavaScript and carries distinct metadata', async ({
@@ -90,13 +96,7 @@ test('static pages hydrate without errors and documentation links work', async (
     await page.goto(route)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     if (route === '/')
-      await page
-        .getByRole('button', { name: 'Structured', exact: true })
-        .click()
-    if (route === '/guides/customization')
-      await page
-        .getByRole('button', { name: 'Custom type', exact: true })
-        .click()
+      await page.getByRole('button', { name: 'Classic', exact: true }).click()
   }
   expect(errors).toEqual([])
 })

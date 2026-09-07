@@ -235,6 +235,7 @@ function InspectorView({
   return (
     <div
       data-rdi-root
+      data-rdi-presentation={props.presentation ?? 'inspector'}
       data-theme={props.theme ?? 'system'}
       data-density={props.density ?? 'compact'}
       data-rdi-unstyled={props.unstyled || undefined}

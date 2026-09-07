@@ -1,6 +1,8 @@
-## Uncontrolled expansion
+## Open branches by path
 
-The root has data depth zero and opens by default. `defaultExpandedDepth` initializes data nodes only; synthetic range groups do not automatically open. `defaultExpandedPaths` adds explicit initial addresses.
+Expansion is separate from object identity. The inspector tracks which addresses are open, so replacing a child value does not automatically collapse its ancestors.
+
+## Uncontrolled usage
 
 ```tsx
 import {
@@ -16,9 +18,20 @@ export function Example() {
 }
 ```
 
-## Controlled expansion
+`defaultExpandedPaths` adds explicit initial addresses. `defaultExpandedDepth` supplies the depth-based expansion baseline for data nodes.
 
-`expandedPaths` is the complete authoritative set. The callback proposes the next complete set; the parent may accept, transform, or decline it.
+## Defaults
+
+| Setting                   | Default | Meaning                                                    |
+| ------------------------- | ------- | ---------------------------------------------------------- |
+| `defaultExpandedDepth`    | `1`     | Open data nodes whose zero-based depth is below this value |
+| `defaultExpandedPaths`    | `[]`    | No additional explicit addresses                           |
+| Root data depth           | `0`     | The default opens the root                                 |
+| Synthetic range expansion | Closed  | Depth-based defaults do not open ranges                    |
+
+A range is a navigation group, not a deeper application value. Its address can be included explicitly when needed.
+
+## Controlled usage
 
 ```tsx
 import { useState } from 'react'
@@ -39,4 +52,16 @@ export function Controlled() {
 }
 ```
 
-Expansion follows addresses. Reordering an array or changing Map/Set iteration order can place a different value at an expanded path. Do not switch between controlled and uncontrolled expansion during a mount.
+`expandedPaths` is the complete authoritative set and overrides the defaults. The callback proposes the next complete set, not a single-node change. The parent may accept, transform, or decline it. Do not switch controlledness during a mount.
+
+## Value updates and ordering
+
+An address can remain expanded across new values. Missing addresses are not visible; the inspector does not promise automatic pruning of application-controlled paths.
+
+Array reordering and Map/Set insertion or removal can place a different value at the same address. Expansion does not follow entity IDs. Use application logic to remap addresses if you require entity-based persistence.
+
+## Reveal and limits
+
+Search and reference navigation may request additional ancestor expansion. Controlled applications must accept that request for reveal to proceed. Depth, visible-row, and collection limits still apply to expanded paths.
+
+See [paths](/concepts/paths), [controlled state](/guides/controlled-state), and [large data](/guides/large-data).

@@ -22,6 +22,7 @@ JavaScript data is a graph. Dates, collections, undefined values, symbols and ob
 - Controlled expansion and selection; cancellable search through collapsed data.
 - Hierarchical ranges and bounded rendering for large values.
 - Tree keyboard navigation, separate focus/selection, accessible actions.
+- Inspector and classic presentations on the same graph engine.
 - CSS variables, targeted slots, custom types and actions, unstyled mode.
 - React 18.3/19, SSR, TypeScript, ESM/CJS; no runtime dependencies beyond React peers.
 
@@ -44,9 +45,11 @@ JavaScript data is a graph. Dates, collections, undefined values, symbols and ob
 }
 ```
 
+Prefer quoted keys and object-viewer syntax? Set `presentation="classic"`; see [presentation modes](https://react-data-inspector.nipesolutions.com/guides/presentation).
+
 See the [compiled customization examples](examples/customization.tsx), [API reference](docs/api.md), [architecture and type matrix](docs/architecture.md), and [performance methodology](benchmarks/README.md).
 
-The first alpha is read-only. Editing will emit immutable change proposals; it will never mutate application data. Getters are not evaluated, promises are not awaited, functions are not executed, and WeakMap/WeakSet contents remain opaque. Collection paths are not presented as JSON Pointers.
+The alpha is read-only; editing is not part of the public API. Getters are not evaluated, promises are not awaited, functions are not executed, and WeakMap/WeakSet contents remain opaque. Collection paths are not presented as JSON Pointers.
 
 ## Development
 

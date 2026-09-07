@@ -50,7 +50,8 @@ export function JsonContrast() {
           />
           <p className="annotation">
             Values retain their types. References retain their meaning. Expand{' '}
-            <code>identity</code> to follow the graph.
+            <code>identity</code> to follow the graph.{' '}
+            <a href="/concepts/javascript-types">Explore the Type Museum →</a>
           </p>
         </div>
       </div>

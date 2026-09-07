@@ -25,6 +25,7 @@ The root export provides `DataInspector`, `defineInspectorType`, `formatPath`, `
 | actions                     | readonly InspectorAction[] / []                 | Extend the action list.                                                                                      |
 | messages                    | Partial&lt;InspectorMessages&gt;                | Replace action labels, instructions, summary/nodeLabel functions and parameterized result/reference phrases. |
 | className, style            | React root attributes                           | Styling hooks.                                                                                               |
+| presentation                | inspector, classic / inspector                  | Visual notation only; shared inspection model and meaningful rows.                                           |
 | theme                       | light, dark, system / system                    | CSS-only color preference.                                                                                   |
 | density                     | compact, comfortable / compact                  | Default 28px or 36px rows; 40px on coarse pointers.                                                          |
 | unstyled                    | boolean / false                                 | Omit all default appearance selectors; keep behavior and attributes.                                         |
@@ -41,7 +42,19 @@ The application must rerender when input changes. A parent rerender re-inspects 
 
 `inspectionOptions` supports `includeNonEnumerable` (false), `includeSymbols` (true for enumerable own symbols), `sortKeys` (false, true, or string comparator), `maxDepth` (100, maximum 200), `stringLimit` (200 characters, maximum 100,000), and `onInspectionError(error, path)`. Sorting never reorders Map/Set entries. Error detail adapters include non-enumerable own error properties.
 
-`searchOptions` supports `scope: 'keys' | 'values' | 'keys-and-values'` (last by default), `debounce` (150 ms), `maxNodes` (100,000, maximum 1,000,000), `maxResults` (1,000, maximum 10,000), and `stringLimit` (65,536). Work yields between bounded tasks. A search can be limited by depth, collections, nodes, result count or string truncation. Search enumerates hidden branches; normal collapsed rendering does not. Counts indicate incomplete results. Search can revisit a shared subtree at a shallower path to inspect descendants previously hidden by the depth limit. Query changes cancel previous scans. Data updates coalesce without restarting the query debounce; completed results remain usable while the localizable `refreshing` status reports “Updating results…”. Matches can lag live data, and reveal checks the current value. Mutating the same object does not provide an atomic search snapshot.
+`searchOptions` supports the following settings:
+
+| Option        | Default           | Maximum / choices                   |
+| ------------- | ----------------- | ----------------------------------- |
+| `scope`       | `keys-and-values` | `keys`, `values`, `keys-and-values` |
+| `debounce`    | 150 ms            | Query scheduling delay              |
+| `maxNodes`    | 100,000           | 1,000,000                           |
+| `maxResults`  | 1,000             | 10,000                              |
+| `stringLimit` | 65,536 characters | 100,000 characters                  |
+
+Search yields between bounded tasks and visits hidden branches. Depth, collection, node, result-count, and string limits can make counts incomplete. Query changes cancel earlier scans; data updates coalesce into a follow-up scan while completed results remain available.
+
+See [search behavior](https://react-data-inspector.nipesolutions.com/docs/search) for shared-path revisits, refresh state, controlled queries, and reveal against changing data. A scan is not an atomic snapshot, and synchronous application callbacks cannot be preempted.
 
 ## Paths
 
@@ -82,24 +95,10 @@ Use `defineInspectorType<T>` to preserve inference while combining heterogeneous
 
 ## Styling contract
 
-Styles are scoped with zero-specificity selectors rooted in `[data-rdi-root]:not([data-rdi-unstyled])`. No global reset or CSS-in-JS runtime. Consumer CSS variables override defaults without specificity escalation.
+The canonical [styling reference](https://react-data-inspector.nipesolutions.com/reference/styling) lists CSS variables, stable presence/state attributes, theme and density defaults, and unstyled responsibilities. Styles remain scoped with zero-specificity selectors; no global reset or CSS-in-JS runtime is required. DOM nesting and implementation class names are private.
 
-| Variables                                                           | Meaning                                    |
-| ------------------------------------------------------------------- | ------------------------------------------ |
-| --rdi-font-family, --rdi-font-size, --rdi-line-height               | Typography                                 |
-| --rdi-background, --rdi-foreground, --rdi-muted                     | Surface and text                           |
-| --rdi-key-color, --rdi-string-color, --rdi-number-color             | Key, string, number/bigint syntax          |
-| --rdi-boolean-color, --rdi-null-color, --rdi-special-color          | Boolean, nullish/accessor, special syntax  |
-| --rdi-row-height, --rdi-indent                                      | Uniform row height and logical indentation |
-| --rdi-radius, --rdi-border-color                                    | Frame treatment                            |
-| --rdi-hover-background, --rdi-selected-background, --rdi-focus-ring | Interaction state                          |
+## Presentation
 
-Stable presence selectors: `data-rdi-root`, `data-rdi-node`, `data-rdi-tree`, `data-rdi-key`, `data-rdi-value`, `data-rdi-toggle`, `data-rdi-actions`, `data-rdi-reference`, `data-rdi-search`, `data-rdi-footer`, `data-rdi-unstyled`, `data-rdi-match` (only matches).
+`presentation="inspector"` is the default. `presentation="classic"` changes built-in visual notation using quoted property keys and balanced inline container delimiters. It adds no closing-delimiter rows or selectable synthetic punctuation. Both presentations share paths, graph identity, search, selection, expansion, actions, grouping, virtualization, and SSR behavior.
 
-Stable state attributes: `data-type`, `data-depth` (zero-based display depth), `data-expanded`, `data-selected`, `data-focused` (string true/false), `data-theme`, `data-density`. DOM nesting and private CSS class names are not a styling contract. Logical padding supports RTL. Search matches are underlined, focus is outlined, selection has its own fill.
-
-In unstyled mode, provide your own tree overflow, single-line row geometry, indentation, focus and selection appearance. The current virtualizer requires uniform row heights; use `virtualization={false}` for wrapping or variable-height custom rows. Even without virtualization, grouping and the row limit remain active.
-
-## Editing design
-
-No editing prop is exported in this alpha. The next editing stage proposes a readonly replace/add/remove union with `path`, `value`, and `previousValue` where applicable. The application decides whether to apply a proposal. Initial string/number/boolean/null input will use deterministic parsing and normal form controls; any later JSON text mode uses JSON.parse. JSON Patch conversion will be restricted to compatible paths and values, not used as the internal model.
+Classic output is not serialized JSON or executable JavaScript. Non-JSON type summaries and separately addressed Map key/value rows retain their meaning. See [presentation modes](https://react-data-inspector.nipesolutions.com/guides/presentation) for examples and customization boundaries.

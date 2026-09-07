@@ -53,6 +53,7 @@ export function createModel(
       summary = override?.summary ?? '',
       source: (() => Source) | undefined,
       searchText = ''
+    let custom = false
     let reference: Node['reference']
     const object =
       (typeof value === 'object' && value !== null) ||
@@ -80,7 +81,6 @@ export function createModel(
         type = 'reference'
         summary = reference.kind
       } else if (!override) {
-        let custom = false
         for (const definition of options.types ?? []) {
           const match = definition.inspect(value)
           if (!match) continue
@@ -350,6 +350,7 @@ export function createModel(
       searchText: searchText || summary,
       expandable: !!source && !limited,
       ...(reference ? { reference } : {}),
+      ...(custom ? { customType: true } : {}),
       children(offset = 0, limit = Infinity) {
         if (!source || limited) return []
         if (!loadChildren) {

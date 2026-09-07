@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
-  await page.locator('.json-disclosure > summary').click()
 })
 test('keyboard navigation, selection and actions restore focus', async ({
   page,
@@ -35,10 +34,7 @@ test('search reveals hidden values and exposes result status', async ({
 test('half-million array is grouped and virtualized keyboard target stays mounted', async ({
   page,
 }) => {
-  await page
-    .getByLabel('Inspect', { exact: true })
-    .selectOption('500,000 items')
-  const tree = page.getByRole('tree', { name: 'Playground inspector' })
+  const tree = page.getByRole('tree', { name: 'Half million values' })
   expect(await tree.getByRole('treeitem').count()).toBeLessThanOrEqual(101)
   await tree.focus()
   await tree.press('ArrowDown')
@@ -72,13 +68,14 @@ test('custom type, unstyled behavior and controlled integration', async ({
   ).toContainText('$.user.name')
 })
 test('JSON input is parsed without evaluating JavaScript', async ({ page }) => {
+  await page.goto('/playground?section=json')
   await page.getByLabel('JSON input', { exact: true }).fill('new Date()')
   await page.getByRole('button', { name: 'Inspect JSON', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('Invalid JSON')
   await page.getByLabel('JSON input', { exact: true }).fill('{"safe":42}')
   await page.getByRole('button', { name: 'Inspect JSON', exact: true }).click()
   await expect(
-    page.getByRole('tree', { name: 'JSON input inspector' }),
+    page.getByRole('tree', { name: 'JSON inspector' }),
   ).toContainText('42')
 })
 test('automated accessibility checks for default and dark custom type', async ({
@@ -109,15 +106,16 @@ test('mobile layout and RTL tree remain navigable', async ({ page }) => {
 test('virtualized End target remains visible after CSS row-height changes', async ({
   page,
 }) => {
+  await page.goto('/playground?section=json')
   await page
     .getByLabel('JSON input', { exact: true })
     .fill(JSON.stringify(Array.from({ length: 1000 }, (_, i) => i)))
   await page.getByRole('button', { name: 'Inspect JSON', exact: true }).click()
-  const tree = page.getByRole('tree', { name: 'JSON input inspector' })
+  const tree = page.getByRole('tree', { name: 'JSON inspector' })
   await tree.focus()
   await tree.press('End')
   await page
-    .locator('.json-section [data-rdi-root]')
+    .locator('.lab-main [data-rdi-root]')
     .evaluate((el) =>
       (el as HTMLElement).style.setProperty('--rdi-row-height', '44px'),
     )

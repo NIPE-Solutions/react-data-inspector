@@ -1,3 +1,4 @@
+import { legalPages } from './Legal'
 import { articles } from '../articles'
 import { origin } from './Chrome'
 export const routes = [
@@ -9,6 +10,7 @@ export const routes = [
       'Inspect the object you actually have. A React JSON viewer alternative with real JavaScript types, shared references, cycles, controlled state and deep customization.',
   },
   ...articles,
+  ...legalPages,
   {
     path: '/playground',
     title: 'Interactive playground',

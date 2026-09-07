@@ -755,3 +755,183 @@ html {
 .custom-demo > .controlled-example {
   grid-template-columns: 1fr;
 }
+
+/* Editorial hierarchy: summaries share space; a new subject earns a rule. */
+.principles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding-block: 24px;
+  margin: 0;
+  border-block: 1px solid var(--rule);
+}
+.principles dt {
+  font-weight: 650;
+  font-size: 14px;
+}
+.principles dd {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.workshop-controls {
+  margin-bottom: 28px;
+}
+.workshop-controls .mode-tabs {
+  margin: 0;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.workshop-controls .mode-tabs > span {
+  width: 100px;
+  font-size: 12px;
+  color: var(--muted);
+  align-self: center;
+}
+.keyboard-proof {
+  border-top: 1px solid var(--rule);
+  padding-block: 32px;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 12px 36px;
+}
+.keyboard-proof h2 {
+  font-size: 24px;
+  margin: 0;
+  grid-row: span 3;
+}
+.keyboard-proof p {
+  margin: 0;
+  max-width: 68ch;
+}
+.keyboard-proof a {
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.community {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+}
+.community h2 {
+  margin: 0;
+}
+.community p {
+  max-width: 60ch;
+}
+.star-link {
+  display: inline-block;
+  font-weight: 600;
+  margin-block: 12px;
+}
+.doc-article > p,
+.doc-article > ul,
+.doc-article > ol,
+.doc-article > blockquote {
+  max-width: 72ch;
+}
+.doc-search-results {
+  font-size: 12px;
+  border-bottom: 1px solid var(--rule);
+  margin-block: 12px;
+}
+.doc-search-results ul {
+  list-style: none;
+  padding: 0;
+}
+.doc-search-results li {
+  margin-block: 16px;
+}
+.doc-search-results a {
+  font-weight: 600;
+  text-decoration: underline;
+}
+.doc-search-results p {
+  margin-block: 6px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.doc-article .type-museum {
+  padding-block: 32px;
+}
+.legal-page {
+  max-width: 900px;
+  padding-block: 56px 80px;
+}
+.legal-page h1 {
+  font-size: clamp(36px, 4vw, 52px);
+  margin-block: 24px;
+}
+.legal-page h2 {
+  font-size: 22px;
+  margin: 0 0 18px;
+}
+.legal-page section {
+  padding-block: 32px;
+  border-top: 1px solid var(--rule);
+}
+.legal-page p,
+.legal-page address {
+  max-width: 72ch;
+}
+.legal-page address {
+  font-style: normal;
+}
+.legal-page a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.legal-page dl > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding-block: 8px;
+}
+.legal-page dd {
+  margin: 0;
+}
+footer {
+  align-items: baseline;
+  gap: 24px;
+}
+footer nav {
+  gap: 12px 20px;
+}
+@media (max-width: 760px) {
+  .principles {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .principles > div {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 8px;
+  }
+  .principles dd {
+    margin: 0;
+  }
+  .keyboard-proof,
+  .community {
+    grid-template-columns: 1fr;
+  }
+  .keyboard-proof h2 {
+    grid-row: auto;
+  }
+  .workshop-controls .mode-tabs > span {
+    width: 100%;
+  }
+  .doc-layout > aside[data-open='false'] .doc-search-results {
+    display: none;
+  }
+  .doc-layout > aside nav {
+    grid-template-columns: 1fr;
+  }
+  .legal-page {
+    padding-block: 32px 48px;
+  }
+  .legal-page dl > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

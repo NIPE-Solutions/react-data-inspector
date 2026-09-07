@@ -9,7 +9,7 @@ export function Header({ main = 'main' }: { main?: string }) {
       <a className="skip" href={`#${main}`}>
         Skip to content
       </a>
-      <header>
+      <header id="top">
         <a className="brand" href="/">
           <img
             className="brand-mark"
@@ -36,12 +36,18 @@ export function Footer() {
       <a href="https://opensource.nipesolutions.com">
         Part of NIPE Open Source
       </a>
-      <p>A focused primitive. Application-owned data.</p>
       <nav aria-label="Footer">
+        <a href={repository}>GitHub ↗</a>
+        <a href={`${repository}/blob/main/LICENSE`}>MIT License</a>
+        <a href="/imprint">Imprint</a>
+        <a href="/privacy">Privacy</a>
         <a href="/limitations">Limitations</a>
-        <a href="/accessibility">Accessibility</a>
-        <a href="/docs/installation">Install</a>
-        <a href={repository}>GitHub</a>
+        {publishedVersion && (
+          <a href="https://www.npmjs.com/package/@nipe-solutions/react-data-inspector">
+            npm ↗
+          </a>
+        )}
+        <a href="#top">Back to top ↑</a>
       </nav>
     </footer>
   )

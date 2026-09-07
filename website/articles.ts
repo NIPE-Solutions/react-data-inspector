@@ -1,3 +1,8 @@
+import gettingStarted from './docs/getting-started.md?raw'
+import javascriptTypes from './docs/javascript-types.md?raw'
+import controlledState from './docs/controlled-state.md?raw'
+import styling from './docs/styling.md?raw'
+import presentation from './docs/presentation.md?raw'
 import introduction from './docs/introduction.md?raw'
 import installation from './docs/installation.md?raw'
 import expansion from './docs/expansion.md?raw'
@@ -32,42 +37,42 @@ export const articles: readonly Article[] = [
     path: '/docs',
     title: 'Introduction',
     description: 'Inspect application-owned JavaScript values in React.',
-    group: 'Docs',
+    group: 'Getting started',
     content: introduction,
   },
   {
     path: '/docs/installation',
     title: 'Installation',
     description: 'Build, install, import, and style the package.',
-    group: 'Docs',
+    group: 'Getting started',
     content: installation,
   },
   {
     path: '/docs/expansion',
     title: 'Expansion',
     description: 'Use controlled or uncontrolled expansion paths.',
-    group: 'Docs',
+    group: 'Core behavior',
     content: expansion,
   },
   {
     path: '/docs/selection',
     title: 'Selection',
     description: 'Coordinate focus, selection, and details views.',
-    group: 'Docs',
+    group: 'Core behavior',
     content: selection,
   },
   {
     path: '/docs/search',
     title: 'Search',
     description: 'Search collapsed data with explicit work limits.',
-    group: 'Docs',
+    group: 'Core behavior',
     content: search,
   },
   {
     path: '/docs/copying',
     title: 'Copying',
     description: 'Copy values and paths without silent data loss.',
-    group: 'Docs',
+    group: 'Core behavior',
     content: copying,
   },
   {
@@ -95,21 +100,21 @@ export const articles: readonly Article[] = [
     path: '/guides/customization',
     title: 'Customization',
     description: 'Apply themes, slots, actions, and controlled state.',
-    group: 'Guides',
+    group: 'Customization',
     content: customization,
   },
   {
     path: '/guides/custom-types',
     title: 'Custom types',
     description: 'Teach the inspector about domain values.',
-    group: 'Guides',
+    group: 'Customization',
     content: customTypes,
   },
   {
     path: '/guides/large-data',
     title: 'Large data',
     description: 'Use grouping, limits, and virtualization deliberately.',
-    group: 'Guides',
+    group: 'Core behavior',
     content: largeData,
   },
   {
@@ -151,21 +156,57 @@ export const articles: readonly Article[] = [
     path: '/performance',
     title: 'Performance',
     description: 'Reproduce and interpret the benchmark evidence.',
-    group: 'Project',
+    group: 'Quality',
     content: performance,
   },
   {
     path: '/accessibility',
     title: 'Accessibility',
     description: 'Keyboard behavior, semantics, and audit status.',
-    group: 'Project',
+    group: 'Quality',
     content: accessibility,
   },
   {
     path: '/limitations',
     title: 'Limitations',
     description: 'Current product and inspection boundaries.',
-    group: 'Project',
+    group: 'Quality',
     content: limitations,
+  },
+  {
+    path: '/docs/getting-started',
+    title: 'Getting started',
+    description: 'Embed an inspector and connect application-owned values.',
+    group: 'Getting started',
+    content: gettingStarted,
+  },
+  {
+    path: '/concepts/javascript-types',
+    title: 'JavaScript types',
+    description: 'Explore value categories and their inspection semantics.',
+    group: 'Concepts',
+    content: javascriptTypes,
+  },
+  {
+    path: '/guides/controlled-state',
+    title: 'Controlled state',
+    description: 'Connect expansion and selection to your application.',
+    group: 'Core behavior',
+    content: controlledState,
+  },
+  {
+    path: '/reference/styling',
+    title: 'Styling reference',
+    description:
+      'CSS variables, stable data attributes, and layout requirements.',
+    group: 'Reference',
+    content: styling,
+  },
+  {
+    path: '/guides/presentation',
+    title: 'Presentation modes',
+    description: 'Choose inspector or classic syntax with the same behavior.',
+    group: 'Customization',
+    content: presentation,
   },
 ]

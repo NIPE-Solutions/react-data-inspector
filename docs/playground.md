@@ -1,6 +1,6 @@
 # Playground
 
-Run `npm run dev` and open `/playground`. The homepage links to the laboratory. Static hosts must route `/playground` to the site's `index.html` (SPA fallback). Nothing is hosted or published automatically.
+Run `npm run dev` and open `/playground`, or use the [hosted playground](https://react-data-inspector.nipesolutions.com/playground). The production website build prerenders the route as HTML; Vercel serves it through clean URLs. GitHub Actions deploys verified website changes automatically, separately from npm publication. See [deployment](deployment.md).
 
 ## Scenarios
 
@@ -16,7 +16,7 @@ Immutable updates are primary. The same-reference example mutates application-ow
 
 ## Customization
 
-Light/dark, CSS brand colors, compact/comfortable density, toggle-only replacement, Money children, additive application actions, unstyled design-system appearance and controlled selection are available. Source panels contain code from compiling files. Copy `live-updates.tsx` with `live-data.ts`; copy scenario definitions with `customization.tsx`. Imports shown in source panels target the package; install the package and React, and import the packaged stylesheet for default appearance. Unstyled mode requires your own stylesheet (the site provides an example appearance).
+Inspector/classic presentation, light/dark, CSS brand colors, compact/comfortable density, toggle-only replacement, Money children, additive application actions, unstyled design-system appearance and controlled selection are available. Source panels contain code from compiling files. Copy `live-updates.tsx` with `live-data.ts`; copy scenario definitions with `customization.tsx`. Imports shown in source panels target the package; install the package and React, and import the packaged stylesheet for default appearance. Unstyled mode requires your own stylesheet (the site provides an example appearance).
 
 Share configuration produces a URL for section, scenario, appearance and dataset size. Other controls, pasted JSON, selections and running state are deliberately not included. Reset restores defaults. No values are transmitted.
 
