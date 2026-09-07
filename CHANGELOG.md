@@ -9,3 +9,5 @@ Includes a documentation/playground site, React 18/19 test matrix, SSR/hydration
 Reference text is directly actionable and jumps select the original node. Enter activates branches/references, Space selects, and search supports Enter/Shift+Enter navigation.
 
 Adds a dedicated playground with predefined type scenarios, standalone live-update examples, customization controls, large-data and lazy-child demonstrations, opt-in measurements, shareable configurations and a manual validation checklist.
+
+Adds seeded random updates for complex service graphs, optional application-owned update pulses with reduced-motion support, and expanded CSS typography/spacing/color controls.

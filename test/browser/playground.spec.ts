@@ -182,3 +182,78 @@ test('custom actions remain additive and JSON input never evaluates expressions'
   await page.getByRole('button', { name: 'Validation', exact: true }).click()
   await expect(page.getByRole('status')).toContainText('0 of 6')
 })
+
+test('random stress updates run, pause and replay the same changed fields', async ({
+  page,
+}) => {
+  await page.goto('/playground?section=stress')
+  await page.getByRole('button', { name: 'Apply random batch' }).click()
+  await expect(page.getByTestId('stress-ticks')).toHaveText(
+    '1 batches · 10 field updates',
+  )
+  const journal = await page.getByTestId('change-journal').innerText()
+  await page.getByRole('button', { name: 'Reset seeded run' }).click()
+  await page.getByRole('button', { name: 'Apply random batch' }).click()
+  await expect(page.getByTestId('change-journal')).toHaveText(journal, {
+    useInnerText: true,
+  })
+  await page.getByRole('button', { name: 'Start random updates' }).click()
+  await expect(page.getByTestId('stress-ticks')).not.toHaveText(
+    '1 batches · 10 field updates',
+  )
+  await page.getByRole('button', { name: 'Pause random updates' }).click()
+  await page.getByLabel('Enable measurements').check()
+  await expect(page.getByTestId('mounted-rows')).not.toHaveText('0')
+  await page.getByRole('tree').focus()
+  await page.getByRole('tree').press('End')
+  await expect(page.getByRole('tree')).toBeFocused()
+})
+
+test('stress pulses are optional presentation and respect reduced motion', async ({
+  page,
+}) => {
+  await page.goto('/playground?section=stress')
+  await page
+    .getByRole('combobox', { name: 'Services', exact: true })
+    .selectOption('25')
+  await page
+    .getByRole('combobox', { name: 'Fields per batch' })
+    .selectOption('1')
+  await page.getByRole('button', { name: 'Expand 6', exact: true }).click()
+  await page
+    .getByRole('button', { name: 'Expand metrics', exact: true })
+    .click()
+  await page.getByRole('button', { name: 'Apply random batch' }).click()
+  const updated = page
+    .getByRole('treeitem', { name: 'requests: 578', exact: true })
+    .locator('[data-stress-updated]')
+  await expect(updated).toBeVisible()
+  await expect(updated).toHaveCSS('animation-name', 'field-update')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(updated).toHaveCSS('animation-name', 'none')
+  await page.getByRole('checkbox', { name: 'Pulse updated fields' }).uncheck()
+  await expect(page.locator('[data-stress-updated]')).toHaveCount(0)
+})
+
+test('brand variables control typography and spacing', async ({ page }) => {
+  await page.goto('/playground?section=customization&appearance=brand')
+  await page
+    .getByRole('combobox', { name: 'Font size', exact: true })
+    .selectOption('16')
+  await page
+    .getByRole('combobox', { name: 'Row height', exact: true })
+    .selectOption('40')
+  await page
+    .getByRole('combobox', { name: 'Indentation', exact: true })
+    .selectOption('28')
+  const root = page.locator('[data-rdi-root]')
+  await expect(root).toHaveCSS('font-size', '16px')
+  await expect(root.locator('[data-rdi-node]').first()).toHaveCSS(
+    'height',
+    '40px',
+  )
+  await page.getByText('Copy CSS variables', { exact: true }).click()
+  await expect(
+    page.locator('.lab-source').filter({ hasText: 'Copy CSS variables' }),
+  ).toContainText('--rdi-indent: 28px')
+})

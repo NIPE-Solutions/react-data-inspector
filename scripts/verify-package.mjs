@@ -77,6 +77,8 @@ try {
   for (const [input, output] of [
     ['examples/live-updates.tsx', 'live-updates.tsx'],
     ['examples/live-data.ts', 'live-data.ts'],
+    ['examples/stress-data.ts', 'stress-data.ts'],
+    ['examples/update-pulse.tsx', 'update-pulse.tsx'],
     ['examples/customization.tsx', 'customization.tsx'],
     ['website/playground/scenarios.tsx', 'scenarios.tsx'],
   ]) {
@@ -103,6 +105,8 @@ try {
       '--moduleResolution',
       'Bundler',
       'live-updates.tsx',
+      'stress-data.ts',
+      'update-pulse.tsx',
       'customization.tsx',
       'scenarios.tsx',
     ],

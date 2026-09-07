@@ -33,3 +33,19 @@ No portable browser heap measurement is claimed. Use browser memory tooling and 
 ## Validation
 
 The checklist records observations only for the current mounted section. It neither runs CI nor asserts accessibility certification. Browser regression tests cover the playground interactions, plus the existing library suite. Manual screen-reader testing, current Safari/mobile Safari and real application dogfooding remain release gates. This simulated pipeline is a demonstration, not completed production integration.
+
+## Random updates and field pulses
+
+Open `/playground?section=stress`. The seeded service fleet contains nested metrics/configuration, Maps, Sets, binary buffers, URLs, dates, errors, shared tenants and per-service cycles. Choose 25/100/1,000 services, 1/10/50 field operations per batch, and requested intervals from 50 to 1,000 ms. Start/pause, apply one batch, or reset using the same seed. Seed changes take effect on reset or dataset-size changes. The same seed and batch sequence reproduce field choices; timings and Error stacks are environment-dependent.
+
+Updates replace affected branches, preserving untouched service identities. The application owns the workload and timer. The journal retains the latest 20 primary field operations; each also advances its service timestamp. Counts refer to operations, not unique changed paths. The root, service list and update journal add work outside the profiled inspector, so its render duration is not a total application-update benchmark. Requested interval is not achieved throughput.
+
+The optional pulse is an application-owned Value slot, demonstrated in [update-pulse.tsx](../examples/update-pulse.tsx). Pass known changed paths and a revision through `ChangeAwareInspector`; provide the pulse CSS shown in the playground. It highlights the latest logged ordinary paths, including timestamps, without recursively comparing the graph. Map/Set changes pulse the collection summary. Rich entry/symbol paths are not represented as JSON Pointer. Opening a previously hidden logged path may play its pulse; this is a latest-batch indication, not a wall-clock change detector. Reduced-motion disables the animation, and a textual journal remains available.
+
+No general change-detection or animation API is added to the library. A future library option would need explicit behavior for hidden nodes, identity changes, shared references, coalescing and reduced motion before becoming a stable contract.
+
+## Customization readiness
+
+Implemented: semantic CSS variables and stable data attributes; light/dark/system themes; compact/comfortable density; normal className/style; unstyled behavior; Toggle/Key/Value/Reference/Actions slots; synchronous typed registries with children; additive application actions; localized messages; controlled expansion and selection. The brand studio exposes independent background/string/number/boolean/focus colors, font family/size, indentation and uniform row height, with copyable CSS. Explicit row-height tokens override density presets.
+
+Still unproven: integrations across representative enterprise design systems and reset styles, manual assistive-technology behavior after custom slot replacements, and broad real-application usage. Uniform-height virtualization remains a constraint. The architecture supports substantial customization; “enterprise-proven” is not the current release claim.

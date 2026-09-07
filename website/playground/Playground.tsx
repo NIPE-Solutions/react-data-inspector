@@ -5,6 +5,7 @@ import customSource from '../../examples/customization.tsx?raw'
 import scenarioSource from './scenarios.tsx?raw'
 import { scenarios, lazyType, LazyRecords, type ScenarioId } from './scenarios'
 import { Live } from './Live'
+import { Stress } from './Stress'
 import { JsonInput } from './JsonInput'
 import { Measurements } from './Measurements'
 import { Validation } from './Validation'
@@ -19,6 +20,7 @@ const sections = [
   'scenarios',
   'customization',
   'live',
+  'stress',
   'performance',
   'json',
   'validation',
@@ -27,6 +29,7 @@ const titles = [
   'Scenarios',
   'Customization',
   'Live updates',
+  'Random updates',
   'Performance',
   'Your JSON',
   'Validation',
@@ -151,6 +154,8 @@ export function Playground() {
           <div className="lab-workspace" key={reset}>
             {config.section === 'live' ? (
               <Live />
+            ) : config.section === 'stress' ? (
+              <Stress />
             ) : config.section === 'json' ? (
               <JsonInput />
             ) : config.section === 'validation' ? (
@@ -224,18 +229,31 @@ function Workbench({
   const [depth, setDepth] = useState(100)
   const [background, setBackground] = useState('#f7fbf9')
   const [syntax, setSyntax] = useState('#206246')
+  const [focusColor, setFocusColor] = useState('#1d664c')
+  const [numberColor, setNumberColor] = useState('#92500b')
+  const [booleanColor, setBooleanColor] = useState('#794b91')
+  const [fontSize, setFontSize] = useState(13)
+  const [rowHeight, setRowHeight] = useState(28)
+  const [indent, setIndent] = useState(18)
+  const [font, setFont] = useState('ui-monospace, monospace')
   const [selected, setSelected] = useState<DataPath | null>(null)
   const [action, setAction] = useState('')
   const custom = section === 'customization'
-  const css = `.my-inspector {\n  --rdi-background: ${background};\n  --rdi-string-color: ${syntax};\n  --rdi-focus-ring: ${syntax};\n}`
-  const style =
-    appearance === 'brand'
-      ? ({
-          '--rdi-background': background,
-          '--rdi-string-color': syntax,
-          '--rdi-focus-ring': syntax,
-        } as CSSProperties)
-      : undefined
+  const tokens = {
+    '--rdi-background': background,
+    '--rdi-string-color': syntax,
+    '--rdi-number-color': numberColor,
+    '--rdi-boolean-color': booleanColor,
+    '--rdi-focus-ring': focusColor,
+    '--rdi-font-size': `${fontSize}px`,
+    '--rdi-row-height': `${rowHeight}px`,
+    '--rdi-indent': `${indent}px`,
+    '--rdi-font-family': font,
+  }
+  const css = `.my-inspector {\n${Object.entries(tokens)
+    .map(([name, value]) => `  ${name}: ${value};`)
+    .join('\n')}\n}`
+  const style = appearance === 'brand' ? (tokens as CSSProperties) : undefined
   return (
     <>
       <div className="lab-intro">
@@ -339,12 +357,82 @@ function Workbench({
             />
           </label>
           <label>
-            String and focus color
+            String color
             <input
               type="color"
               value={syntax}
               onChange={(e) => setSyntax(e.target.value)}
             />
+          </label>
+          <label>
+            Number color
+            <input
+              type="color"
+              value={numberColor}
+              onChange={(e) => setNumberColor(e.target.value)}
+            />
+          </label>
+          <label>
+            Boolean color
+            <input
+              type="color"
+              value={booleanColor}
+              onChange={(e) => setBooleanColor(e.target.value)}
+            />
+          </label>
+          <label>
+            Focus color
+            <input
+              type="color"
+              value={focusColor}
+              onChange={(e) => setFocusColor(e.target.value)}
+            />
+          </label>
+          <label>
+            Font family
+            <select value={font} onChange={(e) => setFont(e.target.value)}>
+              <option value="ui-monospace, monospace">Monospace</option>
+              <option value="system-ui, sans-serif">System sans</option>
+            </select>
+          </label>
+          <label>
+            Font size
+            <select
+              value={fontSize}
+              onChange={(e) => setFontSize(Number(e.target.value))}
+            >
+              {[12, 13, 14, 16].map((n) => (
+                <option key={n} value={n}>
+                  {n} px
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Row height
+            <select
+              value={rowHeight}
+              onChange={(e) => setRowHeight(Number(e.target.value))}
+            >
+              {[28, 32, 36, 40].map((n) => (
+                <option key={n} value={n}>
+                  {n} px
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Indentation
+            <select
+              value={indent}
+              onChange={(e) => setIndent(Number(e.target.value))}
+            >
+              {[12, 18, 24, 28].map((n) => (
+                <option key={n} value={n}>
+                  {n} px
+                </option>
+              ))}
+            </select>
           </label>
           <Source code={css} title="Copy CSS variables" />
         </div>

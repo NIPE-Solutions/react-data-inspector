@@ -15,7 +15,7 @@ Assessed 2026-09-07. Version: 0.1.0-alpha.0. Not published to npm or deployed to
 - Runnable customization cases for CSS-only brand colors, toggle-only replacement, added application actions, Money, unstyled mode, controlled expansion and adjacent selection details.
 - Repeatable model, SSR, search, browser interaction and model-lifetime benchmarks with raw output and methodology.
 
-The local harness has 62 unit/component tests. The browser suite has 17 cases per engine (51 runs), including playground coverage. React 18 was also tested with the earlier 54-test unit suite and eight-case browser suite (24 runs); CI runs the full current matrix for both peers. Those local executions are evidence, not a claim that a remote CI run has completed.
+The local harness has 64 unit/component tests. The browser suite has 20 cases per engine (60 runs), including playground coverage. React 18 was also tested with the earlier 54-test unit suite and eight-case browser suite (24 runs); CI runs the full current matrix for both peers. Those local executions are evidence, not a claim that a remote CI run has completed.
 
 The browser runner is pinned to Playwright 1.58.2 to support the WebKit build available on this macOS host. A newer runner failed before opening a page with an unsupported WebKit protocol setting. This is not evidence of current Safari/iOS support; current-browser CI and actual mobile Safari checks remain necessary.
 

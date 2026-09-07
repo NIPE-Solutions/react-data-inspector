@@ -333,3 +333,39 @@
   color: #b5222b;
   font-size: 13px;
 }
+.lab-controls input[type='number'] {
+  width: 100px;
+  padding: 7px;
+  border: 1px solid var(--rule);
+  background: #fffaf1;
+  border-radius: 4px;
+}
+.stress-journal {
+  max-height: 220px;
+  overflow: auto;
+  padding-inline-start: 24px;
+  font-size: 12px;
+}
+.stress-journal li {
+  padding-block: 3px;
+}
+.stress-journal span {
+  margin-inline-start: 12px;
+  color: var(--muted);
+}
+[data-stress-updated] {
+  animation: field-update 700ms ease-out;
+}
+@keyframes field-update {
+  from {
+    background: #e8dbaf;
+  }
+  to {
+    background: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-stress-updated] {
+    animation: none;
+  }
+}
