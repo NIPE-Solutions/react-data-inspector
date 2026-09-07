@@ -65,18 +65,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm install --global vercel@59.11.7
-      - name: Load Vercel project configuration
-        run: vercel pull --yes --environment="$DEPLOY_ENVIRONMENT" --token="$VERCEL_TOKEN"
-      - name: Build deployment artifact
-        run: |
-          flags=()
-          if [ "$DEPLOY_ENVIRONMENT" = production ]; then flags+=(--prod); fi
-          vercel build "${flags[@]}" --token="$VERCEL_TOKEN"
+      - run: npm run build:website
       - name: Deploy verified website
         id: deploy
-        run: |
-          flags=()
-          if [ "$DEPLOY_ENVIRONMENT" = production ]; then flags+=(--prod); fi
-          url=$(vercel deploy --prebuilt --yes "${flags[@]}" --token="$VERCEL_TOKEN")
-          echo "url=$url" >> "$GITHUB_OUTPUT"
+        run: node scripts/deploy-website.mjs
