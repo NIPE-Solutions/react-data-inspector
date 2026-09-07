@@ -77,6 +77,57 @@ it('waits for controlled expansion acceptance before reporting a revealed select
   await waitFor(() => expect(select).toHaveBeenCalledTimes(1))
   expect(screen.getByText('"needle"')).toBeInTheDocument()
 })
+it.each([true, false])(
+  'rechecks a pending reveal against updated data (target survives: %s)',
+  async (survives) => {
+    const selected = vi.fn()
+    let requested: readonly DataPath[] = []
+    const props = {
+      searchable: true,
+      searchQuery: 'needle',
+      searchOptions: { debounce: 0 },
+      onSelectedPathChange: selected,
+      onExpandedPathsChange: (next: readonly DataPath[]) => {
+        requested = next
+      },
+    }
+    const { rerender } = render(
+      <DataInspector
+        {...props}
+        value={{ hidden: { answer: 'needle' }, tick: 0 }}
+        expandedPaths={[[]]}
+      />,
+    )
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Next result' })).toBeEnabled(),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Next result' }))
+    expect(selected).not.toHaveBeenCalled()
+    rerender(
+      <DataInspector
+        {...props}
+        value={{ hidden: survives ? { answer: 'needle' } : {}, tick: 1 }}
+        expandedPaths={requested}
+      />,
+    )
+    if (survives) {
+      expect(selected).toHaveBeenCalledExactlyOnceWith(
+        ['hidden', 'answer'],
+        expect.objectContaining({ value: 'needle' }),
+      )
+      expect(
+        screen.getByRole('treeitem', { selected: true }),
+      ).toHaveTextContent('needle')
+    } else {
+      expect(selected).not.toHaveBeenCalled()
+      expect(
+        screen.getByText(
+          'This result cannot be revealed within the inspection limits.',
+        ),
+      ).toBeInTheDocument()
+    }
+  },
+)
 it('retains a hidden descendant’s explicit collapse override', () => {
   render(
     <DataInspector

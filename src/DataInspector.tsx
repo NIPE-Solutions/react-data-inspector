@@ -49,7 +49,6 @@ function InspectorView({
       expand: readonly DataPath[]
       matchPath: DataPath | null
       query: string
-      value: unknown
     } | null>(null),
     [revealStatus, setRevealStatus] = useState('')
   const selected =
@@ -151,11 +150,8 @@ function InspectorView({
   useEffect(() => {
     if (!pendingReveal) return
     if (pendingReveal.query !== query) return
-    if (!Object.is(pendingReveal.value, props.value)) {
-      setPendingReveal(null)
-      setRevealStatus(m.revealUnavailable)
-      return
-    }
+    // Reveal follows a path across updates, just like expansion and selection.
+    // Resolve against current rows instead of cancelling on a new root identity.
     const target = rows.find(
       (n) => !n.synthetic && pathEqual(n.path, pendingReveal.path),
     )
@@ -185,7 +181,6 @@ function InspectorView({
     rows,
     opened,
     props.expandedPaths,
-    props.value,
     props.selectedPath,
     props.onSelectedPathChange,
     m.revealUnavailable,
@@ -206,7 +201,6 @@ function InspectorView({
       expand: resolved.expand,
       matchPath,
       query,
-      value: props.value,
     })
     setRevealStatus(m.revealPending)
     requestExpansion([
