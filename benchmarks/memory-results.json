@@ -1,0 +1,7 @@
+{
+  "date": "2026-09-07T09:36:55.551Z",
+  "node": "v24.20.0",
+  "models": 50,
+  "retainedRoots": 0,
+  "methodology": "Drop model and input strong references, yield tasks and force GC five times; inspect WeakRefs only after GC. Observation, not guarantee; excludes mounted React and browser heaps."
+}

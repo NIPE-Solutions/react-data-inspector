@@ -1,0 +1,85 @@
+{
+  "name": "@nipe-solutions/react-data-inspector",
+  "version": "0.1.0-alpha.0",
+  "description": "A structured JavaScript data inspector for React.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NIPE-Solutions/react-data-inspector"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "react": "^18.3.0 || ^19.0.0",
+    "react-dom": "^18.3.0 || ^19.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha",
+    "provenance": true
+  },
+  "scripts": {
+    "dev": "vite --config website/vite.config.ts",
+    "build": "vite build && dts-bundle-generator --project tsconfig.build.json --no-banner -o dist/index.d.ts src/index.ts && node scripts/copy-css.mjs",
+    "build:website": "vite build --config website/vite.config.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:package": "node scripts/verify-package.mjs",
+    "benchmark": "tsx benchmarks/run.ts",
+    "check": "npm run format:check && npm run typecheck && npm test && npm run build && npm run build:website && npm run test:package",
+    "benchmark:memory": "node --expose-gc --import tsx benchmarks/memory.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "benchmark:browser": "node benchmarks/browser.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "1.58.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "dts-bundle-generator": "9.5.1",
+    "jsdom": "^27.0.0",
+    "prettier": "3.9.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tsx": "^4.20.0",
+    "typescript": "~6.0.3",
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true
+  },
+  "overrides": {
+    "@axe-core/playwright": {
+      "playwright-core": "1.58.2"
+    }
+  },
+  "types": "./dist/index.d.ts"
+}

@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-07T09:35:41.184Z",
+  "browser": "145.0.7632.6",
+  "environment": {
+    "platform": "darwin",
+    "release": "23.6.0",
+    "cpu": "Apple M3 Max"
+  },
+  "methodology": "Five page loads of production Vite site. Wall-clock Playwright action-to-observed-state timing includes automation overhead and the 150ms search debounce. Graph scenario for expansion/search; 1,000 flat numeric items for windowed End navigation. Not an isolated React render benchmark or frame-loss audit.",
+  "samples": [
+    {
+      "expandMs": 73.41999999999996,
+      "collapseMs": 12.251333000000045,
+      "searchRevealMs": 200.38912500000004,
+      "endRevealMs": 8.442000000000007,
+      "mountedRows": 25
+    },
+    {
+      "expandMs": 29.03133300000013,
+      "collapseMs": 16.848707999999988,
+      "searchRevealMs": 198.02495900000008,
+      "endRevealMs": 7.0284999999998945,
+      "mountedRows": 25
+    },
+    {
+      "expandMs": 24.81841600000007,
+      "collapseMs": 15.77841699999999,
+      "searchRevealMs": 202.76579199999992,
+      "endRevealMs": 8.184540999999854,
+      "mountedRows": 25
+    },
+    {
+      "expandMs": 28.229874999999993,
+      "collapseMs": 14.404625000000124,
+      "searchRevealMs": 213.27304099999992,
+      "endRevealMs": 11.82445800000005,
+      "mountedRows": 25
+    },
+    {
+      "expandMs": 29.523583000000144,
+      "collapseMs": 14.991375000000062,
+      "searchRevealMs": 213.32466699999986,
+      "endRevealMs": 7.526875000000018,
+      "mountedRows": 25
+    }
+  ]
+}
