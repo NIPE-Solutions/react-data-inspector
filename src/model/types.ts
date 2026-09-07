@@ -89,5 +89,5 @@ export interface Node extends InspectorNodeContext {
   readonly synthetic: boolean
   readonly limited: boolean
   readonly searchText: string
-  children(): readonly Node[]
+  children(offset?: number, limit?: number): readonly Node[]
 }

@@ -12,6 +12,7 @@ type Child = {
 interface Source {
   count: number
   read(index: number): Child
+  readPage?(offset: number, limit: number): readonly Child[]
 }
 const getter = (proto: object, key: PropertyKey, value: object): unknown => {
   let current: object | null = proto
@@ -25,8 +26,12 @@ const getter = (proto: object, key: PropertyKey, value: object): unknown => {
   }
   return undefined
 }
-export function createModel(value: unknown, options: ModelOptions = {}) {
-  const seen = new WeakMap<object, DataPath>()
+export function createModel(
+  value: unknown,
+  options: ModelOptions = {},
+  revisitShallowerReferences = false,
+) {
+  const seen = new WeakMap<object, { path: DataPath; depth: number }>()
   const encode = createPathEncoder()
   const size = positive(options.arrayGrouping?.size, 100, 1000)
   const threshold = positive(options.arrayGrouping?.threshold, 1000)
@@ -57,12 +62,19 @@ export function createModel(value: unknown, options: ModelOptions = {}) {
       if (!override && object) {
         const obj = value as object
         const first = seen.get(obj)
-        if (first)
+        const circular = ancestors.includes(obj)
+        // A depth-limited encounter must not hide a later inspectable occurrence.
+        if (
+          first &&
+          (circular ||
+            (!revisitShallowerReferences && first.depth < maxDepth) ||
+            depth >= first.depth)
+        )
           reference = {
-            kind: ancestors.includes(obj) ? 'circular' : 'shared',
-            path: first,
+            kind: circular ? 'circular' : 'shared',
+            path: first.path,
           }
-        else seen.set(obj, path)
+        else seen.set(obj, { path, depth })
       }
       if (reference) {
         type = 'reference'
@@ -78,21 +90,27 @@ export function createModel(value: unknown, options: ModelOptions = {}) {
           searchText = match.searchText ?? summary
           if (match.children) {
             const children = match.children
+            const convert = (
+              child: import('./types').InspectorChild | undefined,
+            ): Child => {
+              if (!child)
+                throw Error('Custom child source returned an incomplete page')
+              return {
+                segment: {
+                  kind: 'custom',
+                  typeId: definition.id,
+                  key: child.key,
+                },
+                label: child.key,
+                value: child.value,
+              }
+            }
             source = () => ({
               count: positive(children.count, 0, Number.MAX_SAFE_INTEGER),
-              read(index) {
-                const child = children.getPage(index, 1)[0]
-                if (!child)
-                  throw Error('Custom child source returned an incomplete page')
-                return {
-                  segment: {
-                    kind: 'custom',
-                    typeId: definition.id,
-                    key: child.key,
-                  },
-                  label: child.key,
-                  value: child.value,
-                }
+              read: (index) => convert(children.getPage(index, 1)[0]),
+              readPage: (offset, limit) => {
+                const page = children.getPage(offset, limit)
+                return Array.from({ length: limit }, (_, i) => convert(page[i]))
               },
             })
           }
@@ -314,7 +332,7 @@ export function createModel(value: unknown, options: ModelOptions = {}) {
     const depthLimited = !!source && depth >= maxDepth
     const limited = depthLimited || override?.type === 'limit'
     if (depthLimited) summary += ' · Max depth reached'
-    let cache: readonly Node[] | undefined
+    let loadChildren: Node['children'] | undefined
     const current: Node = {
       id: encode(address),
       path,
@@ -332,23 +350,22 @@ export function createModel(value: unknown, options: ModelOptions = {}) {
       searchText: searchText || summary,
       expandable: !!source && !limited,
       ...(reference ? { reference } : {}),
-      children() {
-        if (cache) return cache
+      children(offset = 0, limit = Infinity) {
         if (!source || limited) return []
-        try {
-          const children = source()
-          cache = rangeChildren(
-            children,
-            0,
-            children.count,
-            current,
-            [...ancestors, ...(object ? [value as object] : [])],
-            path,
-          )
-        } catch (error) {
-          options.onInspectionError?.(error, path)
-          cache = [
-            node(
+        if (!loadChildren) {
+          try {
+            const children = source()
+            loadChildren = pagedChildren(
+              children,
+              0,
+              children.count,
+              current,
+              [...ancestors, ...(object ? [value as object] : [])],
+              path,
+            )
+          } catch (error) {
+            options.onInspectionError?.(error, path)
+            const diagnostic = node(
               undefined,
               [
                 ...address,
@@ -360,10 +377,12 @@ export function createModel(value: unknown, options: ModelOptions = {}) {
               1,
               1,
               { type: 'inspection-error', summary: 'Unable to read children' },
-            ),
-          ]
+            )
+            loadChildren = (from = 0, count = Infinity) =>
+              from === 0 && count > 0 ? [diagnostic] : []
+          }
         }
-        return cache
+        return loadChildren(offset, limit)
       },
     }
     return current
@@ -442,6 +461,37 @@ export function createModel(value: unknown, options: ModelOptions = {}) {
       read: (i) => descriptor(obj, keys[i]!, String(keys[i])),
     }
   }
+  function pagedChildren(
+    source: Source,
+    start: number,
+    end: number,
+    parent: Node,
+    ancestors: readonly object[],
+    base: DataPath,
+  ): Node['children'] {
+    const cache: Node[] = []
+    let complete = false
+    return (offset = 0, limit = Infinity) => {
+      const needed = offset + limit - cache.length
+      if (!complete && needed > 0) {
+        const page = rangeChildren(
+          source,
+          start,
+          end,
+          parent,
+          ancestors,
+          base,
+          cache.length,
+          needed,
+        )
+        for (const child of page) cache.push(child)
+        complete = page.length < needed
+      }
+      return offset === 0 && limit >= cache.length
+        ? cache
+        : cache.slice(offset, offset + limit)
+    }
+  }
   function rangeChildren(
     source: Source,
     start: number,
@@ -449,6 +499,8 @@ export function createModel(value: unknown, options: ModelOptions = {}) {
     parent: Node,
     ancestors: readonly object[],
     base: DataPath,
+    offset = 0,
+    limit = Infinity,
   ): Node[] {
     const count = end - start
     const leafSize = Math.min(size, threshold)
@@ -457,13 +509,16 @@ export function createModel(value: unknown, options: ModelOptions = {}) {
       while (Math.ceil(count / step) > 100) step *= 100
       const total = Math.ceil(count / step),
         result: Node[] = []
-      for (let from = start; from < end; from += step) {
+      for (
+        let from = start + offset * step;
+        from < Math.min(end, start + (offset + limit) * step);
+        from += step
+      ) {
         const to = Math.min(end, from + step),
           address = [
             ...parent.address,
             { kind: 'range' as const, start: from, end: to },
           ]
-        let cached: readonly Node[] | undefined
         const range: Node = {
           id: encode(address),
           address,
@@ -474,24 +529,34 @@ export function createModel(value: unknown, options: ModelOptions = {}) {
           type: 'range',
           depth: parent.depth + 1,
           parentId: parent.id,
-          position: result.length + 1,
+          position: Math.floor((from - start) / step) + 1,
           setSize: total,
           synthetic: true,
           limited: false,
           searchText: '',
           expandable: true,
-          children: () =>
-            cached ??
-            (cached = rangeChildren(source, from, to, range, ancestors, base)),
+          children: (offset, limit) => read(offset, limit),
         }
+        const read = pagedChildren(source, from, to, range, ancestors, base)
         result.push(range)
       }
       return result
     }
     const result: Node[] = []
-    for (let i = start; i < end; i++) {
+    const until = Math.min(end, start + offset + limit)
+    let page: readonly Child[] | undefined
+    let pageStart = start + offset
+    for (let i = start + offset; i < until; i++) {
+      if (source.readPage && (i - pageStart) % 100 === 0) {
+        pageStart = i
+        try {
+          page = source.readPage(i, Math.min(100, until - i))
+        } catch {
+          page = undefined
+        } // Retry individually so one bad entry cannot hide its siblings.
+      }
       try {
-        const child = source.read(i)
+        const child = page ? page[i - pageStart]! : source.read(i)
         result.push(
           node(
             child.value,

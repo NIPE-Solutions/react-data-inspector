@@ -1,13 +1,10 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { DataInspectorProps } from './contracts'
 import { defaultMessages } from './messages'
 import { createModel, buildVisible, type Model } from './model/graph'
 import { pathEqual, type DataPath } from './model/path'
-import {
-  searchValue,
-  type SearchResult,
-  type SearchMatch,
-} from './model/search'
+import type { SearchMatch } from './model/search'
+import { useInspectorSearch } from './useInspectorSearch'
 import { resolvePath } from './model/resolve'
 import type { Node } from './model/types'
 import { Tree } from './Tree'
@@ -42,12 +39,6 @@ function InspectorView({
       props.selectedPath ?? props.defaultSelectedPath ?? [],
     )
   const [queryState, setQuery] = useState(''),
-    [result, setResult] = useState<SearchResult>({
-      matches: [],
-      scanned: 0,
-      limited: false,
-    }),
-    [searching, setSearching] = useState(false),
     [currentMatch, setCurrentMatch] = useState<{
       query: string
       path: DataPath
@@ -64,36 +55,49 @@ function InspectorView({
   const selected =
       props.selectedPath !== undefined ? props.selectedPath : selection,
     query = props.searchQuery ?? queryState
+  const { result, searching, refreshing } = useInspectorSearch({
+    generation: model,
+    value: props.value,
+    query,
+    options: props.searchOptions,
+    modelOptions: {
+      ...props.inspectionOptions,
+      ...(props.types ? { types: props.types } : {}),
+      ...(props.arrayGrouping ? { arrayGrouping: props.arrayGrouping } : {}),
+    },
+  })
   const current =
     currentMatch?.query === query
       ? result.matches.findIndex((match) =>
           pathEqual(match.path, currentMatch.path),
         )
       : -1
-  const openIds = new Set(opened.map(model.encode))
-  const closedIds = new Set(closed.map(model.encode))
-  const controlledIds =
-    props.expandedPaths === undefined
-      ? undefined
-      : new Set(props.expandedPaths.map(model.encode))
-  const isExpanded = (n: Node) =>
-    controlledIds !== undefined
-      ? controlledIds.has(n.id)
-      : openIds.has(n.id) ||
-        (!n.synthetic &&
-          n.depth < (props.defaultExpandedDepth ?? 1) &&
-          !closedIds.has(n.id))
-  const rows = buildVisible(model, isExpanded)
-  const active =
-    rows.find((n) => pathEqual(n.address, focused)) ??
-    [...rows]
-      .reverse()
-      .find(
-        (n) =>
-          n.address.length < focused.length &&
-          pathEqual(n.address, focused.slice(0, n.address.length)),
-      ) ??
-    rows[0]!
+  const { openIds, isExpanded, rows, byId } = useMemo(() => {
+    const openIds = new Set(opened.map(model.encode))
+    const closedIds = new Set(closed.map(model.encode))
+    const controlledIds =
+      props.expandedPaths === undefined
+        ? undefined
+        : new Set(props.expandedPaths.map(model.encode))
+    const isExpanded = (node: Node) =>
+      controlledIds !== undefined
+        ? controlledIds.has(node.id)
+        : openIds.has(node.id) ||
+          (!node.synthetic &&
+            node.depth < (props.defaultExpandedDepth ?? 1) &&
+            !closedIds.has(node.id))
+    const rows = buildVisible(model, isExpanded)
+    return {
+      openIds,
+      isExpanded,
+      rows,
+      byId: new Map(rows.map((node) => [node.id, node])),
+    }
+  }, [model, opened, closed, props.expandedPaths, props.defaultExpandedDepth])
+  let candidate = byId.get(model.encode(focused))
+  for (let depth = focused.length - 1; !candidate && depth >= 0; depth--)
+    candidate = byId.get(model.encode(focused.slice(0, depth)))
+  const active = candidate ?? rows[0]!
   function requestExpansion(next: readonly DataPath[]) {
     if (props.expandedPaths === undefined) {
       setOpened(next)
@@ -132,49 +136,13 @@ function InspectorView({
     props.onSelectedPathChange?.(node.path, node)
   }
   useEffect(() => {
-    const controller = new AbortController()
-    setResult({ matches: [], scanned: 0, limited: false })
-    if (!query) {
-      setSearching(false)
-      return () => controller.abort()
-    }
-    setSearching(true)
-    const timer = setTimeout(() => {
-      void searchValue(
-        props.value,
-        query,
-        props.searchOptions,
-        controller.signal,
-        {
-          ...props.inspectionOptions,
-          ...(props.types ? { types: props.types } : {}),
-          ...(props.arrayGrouping
-            ? { arrayGrouping: props.arrayGrouping }
-            : {}),
-        },
-      ).then(
-        (next) => {
-          if (!controller.signal.aborted) {
-            setResult(next)
-            setCurrentMatch((previous) =>
-              previous?.query === query &&
-              next.matches.some((match) => pathEqual(match.path, previous.path))
-                ? previous
-                : null,
-            )
-            setSearching(false)
-          }
-        },
-        () => {
-          if (!controller.signal.aborted) setSearching(false)
-        },
-      )
-    }, props.searchOptions?.debounce ?? 150)
-    return () => {
-      clearTimeout(timer)
-      controller.abort()
-    }
-  }, [model, query])
+    setCurrentMatch((previous) =>
+      previous?.query === query &&
+      result.matches.some((match) => pathEqual(match.path, previous.path))
+        ? previous
+        : null,
+    )
+  }, [result, query])
   useEffect(() => {
     setCurrentMatch(null)
     setPendingReveal(null)
@@ -312,6 +280,7 @@ function InspectorView({
                     ? m.noMatchesLimited
                     : m.noMatches
                 : ''}
+            {refreshing && <span> · {m.refreshing}</span>}
           </span>
           <button
             type="button"

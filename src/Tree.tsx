@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -82,7 +83,24 @@ export function Tree({
           Math.ceil((scroll + viewport) / height) + overscan,
         )
       : rows.length
-  const activeIndex = Math.max(0, rows.indexOf(active))
+  const { children, indices, ends } = useMemo(() => {
+    const children = new Map<string | null, Node[]>(),
+      indices = new Map<string, number>(),
+      ends = new Map<string, number>(),
+      stack: Node[] = []
+    rows.forEach((node, index) => {
+      while (stack.length && stack[stack.length - 1]!.depth >= node.depth)
+        ends.set(stack.pop()!.id, index)
+      stack.push(node)
+      indices.set(node.id, index)
+      const list = children.get(node.parentId) ?? []
+      list.push(node)
+      children.set(node.parentId, list)
+    })
+    while (stack.length) ends.set(stack.pop()!.id, rows.length)
+    return { children, indices, ends }
+  }, [rows])
+  const activeIndex = indices.get(active.id) ?? 0
   useEffect(() => {
     const tree = treeRef.current
     if (!tree) return
@@ -94,24 +112,10 @@ export function Tree({
     else if (bounds.bottom > frame.top + tree.clientHeight)
       tree.scrollTop += bounds.bottom - frame.top - tree.clientHeight
   }, [activeIndex, height, treeRef])
-  const children = new Map<string | null, Node[]>(),
-    indices = new Map<string, number>(),
-    ends = new Map<string, number>(),
-    stack: Node[] = []
-  rows.forEach((node, index) => {
-    while (stack.length && stack[stack.length - 1]!.depth >= node.depth)
-      ends.set(stack.pop()!.id, index)
-    stack.push(node)
-    indices.set(node.id, index)
-    const list = children.get(node.parentId) ?? []
-    list.push(node)
-    children.set(node.parentId, list)
-  })
-  while (stack.length) ends.set(stack.pop()!.id, rows.length)
   const typeAhead = useRef({ text: '', time: 0 })
   function keyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (e.target !== e.currentTarget) return
-    const current = rows.indexOf(active)
+    const current = activeIndex
     let next: Node | undefined
     if (e.key === 'ArrowDown')
       next = rows[Math.min(rows.length - 1, current + 1)]
@@ -124,7 +128,8 @@ export function Tree({
         next = rows[current + 1]
     } else if (e.key === 'ArrowLeft') {
       if (active.expandable && isExpanded(active)) toggle(active)
-      else next = rows.find((n) => n.id === active.parentId)
+      else if (active.parentId !== null)
+        next = rows[indices.get(active.parentId) ?? -1]
     } else if (e.key === 'Enter') {
       if (active.reference) jump(active)
       else {

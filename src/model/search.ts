@@ -25,11 +25,18 @@ export async function searchValue(
   modelOptions: ModelOptions = {},
 ): Promise<SearchResult> {
   const stringLimit = positive(options.stringLimit, 65536, 100000)
-  const model = createModel(value, { ...modelOptions, stringLimit })
-  const stack: { node: Node; reveal: readonly DataPath[] }[] = [
-    { node: model.root, reveal: [] },
-  ]
+  const model = createModel(value, { ...modelOptions, stringLimit }, true)
+  type Work =
+    | { kind: 'node'; node: Node; reveal: readonly DataPath[] }
+    | {
+        kind: 'children'
+        node: Node
+        offset: number
+        reveal: readonly DataPath[]
+      }
+  const stack: Work[] = [{ kind: 'node', node: model.root, reveal: [] }]
   const matches: SearchMatch[] = []
+  let discovered = 1
   let scanned = 0,
     limited = false
   const max = positive(options.maxNodes, 100000, 1000000),
@@ -52,7 +59,24 @@ export async function searchValue(
       performance.now() - start < 8
     ) {
       abort()
-      const { node, reveal } = stack.pop()!
+      const work = stack.pop()!
+      const { node, reveal } = work
+      if (work.kind === 'children') {
+        const remaining = max - discovered
+        if (remaining <= 0) {
+          limited = true
+          continue
+        }
+        const take = Math.min(100, remaining)
+        const children = node.children(work.offset, take)
+        discovered += children.length
+        const last = children[children.length - 1]
+        if (last && last.position < last.setSize)
+          stack.push({ ...work, offset: work.offset + children.length })
+        for (let i = children.length - 1; i >= 0; i--)
+          stack.push({ kind: 'node', node: children[i]!, reveal })
+        continue
+      }
       scanned++
       if (node.limited) limited = true
       if (
@@ -91,9 +115,14 @@ export async function searchValue(
         })
       }
       if (node.expandable) {
-        const children = node.children()
-        for (let i = children.length - 1; i >= 0; i--)
-          stack.push({ node: children[i]!, reveal: [...reveal, node.address] })
+        if (scanned >= max || matches.length >= maxResults) limited = true
+        else
+          stack.push({
+            kind: 'children',
+            node,
+            offset: 0,
+            reveal: [...reveal, node.address],
+          })
       }
     }
     if (stack.length)

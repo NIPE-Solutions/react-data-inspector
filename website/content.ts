@@ -24,7 +24,7 @@ export const guide = [
   {
     id: 'search',
     title: 'Search',
-    text: 'Enable searchable for the search controls, or control searchQuery externally. Search traverses collapsed data in cancellable tasks with a 150 ms debounce. searchOptions.scope accepts keys, values or keys-and-values. Next/previous reveals ancestors and selects a match while keeping focus in the controls. Counts disclose partial searches. Default limits are 100,000 visited rows, 1,000 results and 64 KiB per string. Shared descendants are indexed once; reference labels can still match.',
+    text: 'Enable searchable for the search controls, or control searchQuery externally. Search traverses collapsed data in cancellable tasks with a 150 ms debounce. searchOptions.scope accepts keys, values or keys-and-values. Next/previous reveals ancestors and selects a match while keeping focus in the controls. Counts disclose partial searches. Default limits are 100,000 visited rows, 1,000 results and 64 KiB per string. Incoming data coalesces into follow-up scans without restarting query debounce. Completed results remain usable during refresh. Search may revisit a shallower shared path to cover depth-limited descendants; reference labels can still match.',
   },
   {
     id: 'copying',

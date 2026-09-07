@@ -61,7 +61,9 @@ it('retains the current result by path when another match is inserted before it'
   await waitFor(() =>
     expect(screen.getByRole('button', { name: 'Next result' })).toBeEnabled(),
   )
-  expect(screen.getByText('2 of 3 matches')).toBeInTheDocument()
+  await waitFor(() =>
+    expect(screen.getByText('2 of 3 matches')).toBeInTheDocument(),
+  )
   fireEvent.click(screen.getByRole('button', { name: 'Next result' }))
   expect(screen.getByRole('treeitem', { selected: true })).toHaveAttribute(
     'aria-label',

@@ -12,6 +12,7 @@ export const defaultMessages = {
   previousResult: 'Previous result',
   nextResult: 'Next result',
   searching: 'Searching…',
+  refreshing: 'Updating results…',
   noMatches: 'No matches',
   nodeActions: 'Node actions',
   close: 'Close actions',

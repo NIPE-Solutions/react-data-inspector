@@ -257,3 +257,25 @@ test('brand variables control typography and spacing', async ({ page }) => {
     page.locator('.lab-source').filter({ hasText: 'Copy CSS variables' }),
   ).toContainText('--rdi-indent: 28px')
 })
+
+test('search finishes while random updates continue every 50 ms', async ({
+  page,
+}) => {
+  await page.goto('/playground?section=stress')
+  await page
+    .getByRole('combobox', { name: 'Update interval' })
+    .selectOption('50')
+  await page.getByRole('button', { name: 'Start random updates' }).click()
+  await page
+    .getByRole('searchbox', { name: 'Search data' })
+    .fill('North region')
+  await expect(page.getByRole('button', { name: 'Next result' })).toBeEnabled()
+  await page.getByRole('button', { name: 'Next result' }).click()
+  await expect(
+    page.getByRole('tree').locator('[data-selected=true]'),
+  ).toContainText('North region')
+  const ticks = await page.getByTestId('stress-ticks').innerText()
+  await expect(page.getByTestId('stress-ticks')).not.toHaveText(ticks)
+  await expect(page.getByRole('button', { name: 'Next result' })).toBeEnabled()
+  await page.getByRole('button', { name: 'Pause random updates' }).click()
+})

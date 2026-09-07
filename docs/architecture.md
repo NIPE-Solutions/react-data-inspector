@@ -6,9 +6,9 @@ One React package owns inspection and transient UI behavior. The application own
 
 ## Model and reference semantics
 
-A model generation contains a scoped WeakMap of object identities, a path encoder and lazily cached child sources. Explicit ancestor identity distinguishes cycles from previously discovered shared references. Shared rows remain terminal by default. Canonical references are first-discovered paths for the current generation, not a promise about the globally first hidden occurrence. A reference target can move after discovery order or a parent render changes. Search has an independent traversal; reveal resolves against the current visible model.
+A model generation contains a scoped WeakMap of object identities, a path encoder and lazily cached child sources. Explicit ancestor identity distinguishes cycles from previously discovered shared references. Shared rows remain terminal by default. Canonical references are first-discovered paths for the current generation, not a promise about the globally first hidden occurrence. A reference target can move after discovery order or a parent render changes. A shallower encounter can supersede a canonical path at the depth limit, so a truncated occurrence cannot hide inspectable children. Search has an independent traversal and revisits shallower shared occurrences to cover descendants hidden by a previous depth limit; reveal resolves against the current visible model.
 
-Expansion belongs to a centralized React controller. The model flattens visible rows for navigation and windowing; the renderer reconstructs nested treeitem/group ownership, retaining ancestor shells. No per-row expansion state, random IDs or module-global inspected graph caches. A fresh parent render creates a model generation; internal focus/search/scroll state does not invalidate the input model. Old jobs cancel on replacement/unmount.
+Expansion belongs to a centralized React controller. The model flattens visible rows for navigation and windowing; the renderer reconstructs nested treeitem/group ownership, retaining ancestor shells. No per-row expansion state, random IDs or module-global inspected graph caches. A fresh parent render creates a model generation; internal focus/search/scroll state does not invalidate the input model. Visible rows and tree ownership indexes are reused until their model or expansion inputs change. Search keeps one active scan and coalesces incoming generations; query changes and unmount cancel obsolete work.
 
 Collapsed objects do not enumerate descendants. Arrays use length and index descriptors. Object ownKeys enumeration is unavoidably synchronous. Grouping is hierarchical and follows original enumeration order. At most 100 range groups are emitted at each grouping level. Explicit safety bounds apply to depth, visible rows, collection iteration, search and copying. Reaching a bound is disclosed.
 
@@ -53,8 +53,14 @@ Property access uses descriptors; accessors are shown rather than invoked. Funct
 
 Proxy reflection traps and custom callbacks can execute arbitrary application code and cannot be sandboxed or preempted. Browser/React development tooling may also inspect application props independently of this library. Diagnostics are localized; consumer error callbacks own their reporting behavior.
 
-SSR performs no browser-global access. React useId prevents cross-instance ID collisions; input/configuration must match on server/client. Windowing begins after hydration. Search jobs start in effects and cancel on generation changes. React 18.3 and 19 are the support targets, with a CI matrix and local matrix verification.
+SSR performs no browser-global access. React useId prevents cross-instance ID collisions; input/configuration must match on server/client. Windowing begins after hydration. Search jobs start in effects; query changes and unmount cancel them. React 18.3 and 19 are the support targets, with a CI matrix and local matrix verification.
 
 ## Roadmap
 
 Before public beta: manual assistive technology audit, real application integration, stronger memory/performance evidence, uniform-row windowing audit and resolution of any remaining correctness defects. Then primitive immutable editing proposals, collection continuation beyond the current cap, and explicit extra-array-property discovery. JSON Patch helpers, worker search, prototype views, hex mode and diffing require separate justification. No AI features or JavaScript evaluator.
+
+## Search during updates
+
+The query debounce is independent of incoming data. One scan completes while newer generations coalesce into the next refresh, scheduled after 50 ms. Completed matches remain navigable with an “Updating results…” status; reveal resolves their paths against the current model. Results are a best-effort live view, not an atomic snapshot when the application mutates the same object. Old jobs release their values after completion or cancellation.
+
+Search discovers children in pages of at most 100 and never requests child nodes beyond its remaining node budget. Ordinary object key enumeration and individual custom callbacks remain synchronous. Custom child sources receive contiguous pages of up to 100 entries, with individual retries for failing pages so one bad entry does not hide siblings. Shared ancestor reveal paths are allocated once per branch.
