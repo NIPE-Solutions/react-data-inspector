@@ -244,3 +244,15 @@
 :where([data-rdi-root]:not([data-rdi-unstyled]) [data-rdi-annotation]) {
   color: var(--rdi-muted);
 }
+
+:where([data-rdi-root]:not([data-rdi-unstyled]) [data-rdi-closing]) {
+  height: var(--rdi-row-height);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding-inline-start: calc(35px + var(--rdi-depth) * var(--rdi-indent));
+  padding-inline-end: 14px;
+  white-space: nowrap;
+  min-width: max-content;
+  color: var(--rdi-muted);
+}

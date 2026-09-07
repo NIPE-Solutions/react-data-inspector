@@ -32,22 +32,23 @@ Dark/system themes override color defaults. Comfortable density uses 36px rows; 
 
 ## Stable presence attributes
 
-| Attribute             | Meaning                                                                  |
-| --------------------- | ------------------------------------------------------------------------ |
-| `data-rdi-root`       | Inspector root                                                           |
-| `data-rdi-tree`       | Tree navigation and scroll region                                        |
-| `data-rdi-node`       | Meaningful navigation row                                                |
-| `data-rdi-key`        | Key content                                                              |
-| `data-rdi-value`      | Value content                                                            |
-| `data-rdi-toggle`     | Expansion control                                                        |
-| `data-rdi-actions`    | Node actions region                                                      |
-| `data-rdi-reference`  | Reference content                                                        |
-| `data-rdi-search`     | Search controls                                                          |
-| `data-rdi-footer`     | Inspector footer                                                         |
-| `data-rdi-unstyled`   | Root opts out of default appearance                                      |
-| `data-rdi-delimiter`  | Decorative classic syntax: `open`, `close`, `comma`, `quote`, or `index` |
-| `data-rdi-annotation` | Supplementary classic container notation                                 |
-| `data-rdi-match`      | Row is a search match                                                    |
+| Attribute             | Meaning                                                                   |
+| --------------------- | ------------------------------------------------------------------------- |
+| `data-rdi-root`       | Inspector root                                                            |
+| `data-rdi-tree`       | Tree navigation and scroll region                                         |
+| `data-rdi-node`       | Meaningful navigation row                                                 |
+| `data-rdi-key`        | Key content                                                               |
+| `data-rdi-value`      | Value content                                                             |
+| `data-rdi-toggle`     | Expansion control                                                         |
+| `data-rdi-actions`    | Node actions region                                                       |
+| `data-rdi-reference`  | Reference content                                                         |
+| `data-rdi-search`     | Search controls                                                           |
+| `data-rdi-footer`     | Inspector footer                                                          |
+| `data-rdi-unstyled`   | Root opts out of default appearance                                       |
+| `data-rdi-delimiter`  | Decorative classic syntax: `open`, `close`, `comma`, `quote`, or `index`  |
+| `data-rdi-closing`    | Decorative closing line; use the same height and indentation as data rows |
+| `data-rdi-annotation` | Supplementary classic container notation                                  |
+| `data-rdi-match`      | Row is a search match                                                     |
 
 These attributes identify semantic parts without guaranteeing a specific DOM hierarchy.
 
@@ -79,3 +80,5 @@ Use logical CSS properties for RTL. Keep focus, selection, and search matching d
 Set `virtualization={false}` when using wrapping or variable-height rows. Grouping and the visible-model limit remain active. Neither setting changes data inspection semantics.
 
 The [unstyled playground](/playground?section=customization&appearance=unstyled) includes the complete design-system CSS and behavior. Use [customization](/guides/customization) for choosing among CSS, slots, types, actions, and controlled state.
+
+In classic mode, `data-rdi-closing` lines use the same uniform height as `data-rdi-node` rows. An unstyled virtualized integration must style both selectors; closing lines have `--rdi-depth` for indentation but contain no interactive controls.

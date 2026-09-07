@@ -1,6 +1,6 @@
 {
   "name": "@nipe-solutions/react-data-inspector",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-beta.0",
   "description": "A structured JavaScript data inspector for React.",
   "type": "module",
   "license": "MIT",
@@ -36,7 +36,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "alpha",
+    "tag": "beta",
     "provenance": true
   },
   "scripts": {

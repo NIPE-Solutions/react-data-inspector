@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import type { Node } from './model/types'
 
-// Syntax is an inline rendering detail. It never adds model nodes, graph reads,
-// virtual offsets, or content to the treeitem's accessible name.
+// Syntax never adds model nodes, graph reads, or accessible tree items.
+// Expanded closing lines have explicit visual offsets in Tree.
 export function Delimiter({
   kind,
   children,
@@ -51,10 +51,12 @@ export function ClassicSummary({
   node,
   text,
   empty,
+  multiline,
 }: {
   node: Node
   text: string
   empty: boolean
+  multiline: boolean
 }) {
   // Consumer localization and custom summaries are complete replacements.
   if (text !== node.summary || node.limited) return text
@@ -68,27 +70,24 @@ export function ClassicSummary({
       </>
     )
   }
-  const brackets =
-    node.type === 'array' ||
-    node.type === 'typedarray' ||
-    node.type === 'arraybuffer' ||
-    node.type === 'dataview'
-  const braces =
-    node.type === 'object' ||
-    node.type === 'map' ||
-    node.type === 'set' ||
-    node.type === 'error'
-  if (!brackets && !braces) return text
+  const delimiters = classicDelimiters(node, text)
+  if (!delimiters) return text
+  const [open, close] = delimiters
   const syntax = (
     <>
-      <Delimiter kind="open">{brackets ? '[' : '{'}</Delimiter>
-      <span data-rdi-annotation aria-hidden="true">
-        {empty ? '' : ' … '}
-      </span>
-      <Delimiter kind="close">{brackets ? ']' : '}'}</Delimiter>
+      <Delimiter kind="open">{open}</Delimiter>
+      {!multiline && (
+        <>
+          <span data-rdi-annotation aria-hidden="true">
+            {empty ? '' : ' … '}
+          </span>
+          <Delimiter kind="close">{close}</Delimiter>
+        </>
+      )}
     </>
   )
   if (node.type === 'object') return syntax
+  if (node.type === 'array' && multiline) return syntax
   if (node.type === 'array')
     return (
       <>
@@ -100,5 +99,32 @@ export function ClassicSummary({
     <>
       {text} {syntax}
     </>
+  )
+}
+
+export function classicDelimiters(
+  node: Node,
+  text: string,
+): readonly [string, string] | undefined {
+  if (
+    node.customType ||
+    node.limited ||
+    node.reference ||
+    text !== node.summary
+  )
+    return undefined
+  if (['array', 'typedarray', 'arraybuffer', 'dataview'].includes(node.type))
+    return ['[', ']']
+  if (['object', 'map', 'set', 'error'].includes(node.type)) return ['{', '}']
+  return undefined
+}
+
+export function classicHidesKey(node: Node): boolean {
+  if (node.synthetic) return false
+  if (!node.path.length) return true
+  const segment = node.path[node.path.length - 1]
+  return (
+    typeof segment === 'number' ||
+    (typeof segment === 'object' && segment.kind === 'set-value')
   )
 }

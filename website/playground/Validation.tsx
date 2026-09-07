@@ -74,8 +74,9 @@ export function Validation() {
       <p>
         Actual screen-reader behavior, current Safari/mobile Safari,
         representative application integration and retained browser heaps still
-        need recorded validation. The project remains{' '}
-        <strong>PRIVATE PREVIEW READY</strong>.
+        need recorded validation. The package is distributed on the beta
+        channel; that does not certify every integration or assistive
+        technology.
       </p>
     </>
   )

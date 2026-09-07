@@ -35,7 +35,7 @@ This audit maps the product deliverables to the implementation and honest releas
 | 29. Limitations              | [Architecture](architecture.md) and [readiness](release-readiness.md)                                           |
 | 30. Roadmap                  | Inspection-first; editing/continuation/integration after audited core                                           |
 | 31. Naming                   | Verified NIPE conventions, public GitHub repository and unpublished npm candidate                               |
-| 32. Readiness                | **PRIVATE PREVIEW READY**; no public-beta or stable claim                                                       |
+| 32. Readiness                | **Beta distribution**; outstanding manual production-qualification audits                                       |
 
 ## Mandatory customization scenarios
 
@@ -55,6 +55,6 @@ Cycle and shared-reference tests distinguish semantics without recursion; getter
 
 ## Accessibility audit
 
-Keyboard-only behavior, collapse/focus restoration, selection, search, actions, RTL/mobile and windowed active descendants have automated interaction coverage and live browser inspection. Axe passes the default and dark examples. No human screen-reader audit was performed. Editing accessibility is not applicable to this read-only alpha. See the public-beta blockers before describing the project as production-ready.
+Keyboard-only behavior, collapse/focus restoration, selection, search, actions, RTL/mobile and windowed active descendants have automated interaction coverage and live browser inspection. Axe passes the default and dark examples. No human screen-reader audit was performed. Editing accessibility is not applicable to this read-only beta. See the remaining production-qualification work before describing the project as production-ready.
 
 The dedicated [playground](playground.md) now includes externally updated data, typed-value scenarios, styling controls, lazy children and opt-in performance measurements. Standalone live examples are verified against the packed package.

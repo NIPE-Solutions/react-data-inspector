@@ -1,8 +1,8 @@
 # Release readiness
 
-Classification: **PRIVATE PREVIEW READY**
+Distribution: **beta**. Manual production-qualification audits remain open.
 
-Assessed 2026-09-07. Version: 0.1.0-alpha.0. The package is not published to npm. Website hosting and automatic deployment are configured separately; see [deployment](deployment.md).
+Assessed 2026-09-07. Version: 0.1.0-beta.0. Beta publication is performed by the verified version-tag workflow; check the [npm beta channel](https://www.npmjs.com/package/@nipe-solutions/react-data-inspector?activeTab=versions) and [release workflow](https://github.com/NIPE-Solutions/react-data-inspector/actions/workflows/ci.yml) for registry status. See [deployment](deployment.md).
 
 ## Verified
 
@@ -29,13 +29,13 @@ Opening the 500,000-item array produces 51 first-level model rows with defaults.
 
 The forced-GC experiment observed all 50 discarded model roots collected. It does not establish absence of leaks in mounted React components, browser heaps or application-held callback contexts. No frame-loss or retained-browser-heap claim is made.
 
-## Public-beta blockers
+## Remaining production-qualification work
 
 1. Perform and record actual VoiceOver/Safari and NVDA/Firefox or Chrome navigation, selection, search, actions and virtualization audits. Keyboard automation and axe are insufficient.
 2. Dogfood through the public API in an application such as source metadata/job payload inspection. No application integration has been performed.
 3. Audit mounted-browser retained heaps across repeated input replacement/unmount, and scrolling frame timing on representative hardware.
 4. Validate current desktop/mobile Safari and current evergreen browser versions beyond the locally available pinned WebKit.
-5. Review the deliberately limited alpha contracts: uniform-height virtualization, first 10,000 Map/Set entries, indexed-only arrays, bounded search/reveal and discovery-scoped reference targets.
+5. Review the deliberately limited beta contracts: uniform-height virtualization, first 10,000 Map/Set entries, indexed-only arrays, bounded search/reveal and discovery-scoped reference targets.
 
 ## Deferred features
 
@@ -43,6 +43,6 @@ Editing, add/remove proposals, JSON Patch conversion, collection continuation, p
 
 ## Naming and publication
 
-The public GitHub repository is `NIPE-Solutions/react-data-inspector`, matching this checkout's origin. The npm registry returned 404 for `@nipe-solutions/react-data-inspector` on 2026-09-07. The name follows neighboring NIPE packages; it is not reserved and publication permission has not been proven by a publish attempt.
+The public GitHub repository and npm package are `NIPE-Solutions/react-data-inspector` and `@nipe-solutions/react-data-inspector`. The first beta is `0.1.0-beta.0`, published with dist-tag `beta`; a beta version does not claim stable API or completion of the manual audits above.
 
-`react-data-inspector.nipesolutions.com` follows the NIPE docs-host pattern. Its GoDaddy CNAME points to the Vercel project in the NIPE Solutions team. GitHub Actions deploys `website/dist` from `main` after both React verification jobs pass. The repository is public; the npm package remains unpublished. Website publication does not raise the library release classification.
+GitHub Actions checks React 18/19, builds the package, publishes a matching version tag, and deploys the website after publication so the real npm installation command is visible. Future publication uses package-scoped trusted publishing. See [release process](releasing.md).

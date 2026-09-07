@@ -39,7 +39,9 @@ export function ClassicExample() {
 }
 ```
 
-Containers use balanced inline braces or brackets on their existing data row. Expanding a row reveals children beneath it; there are no additional closing-delimiter rows. This keeps navigation and virtualized row geometry aligned with actual inspection nodes.
+Expanded containers open on their data row and close on a separate decorative line after their children. Object properties use quoted keys; the root and array/Set items omit positional labels. Commas follow values or closing delimiters. Collapsed containers retain a compact preview.
+
+Closing lines are not selectable data nodes. The renderer tracks their visual offsets for windowing while keyboard navigation still moves only through meaningful data nodes.
 
 ## Non-JSON values remain non-JSON
 

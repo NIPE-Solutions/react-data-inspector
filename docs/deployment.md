@@ -13,7 +13,7 @@ The website uses the `react-data-inspector` project in the NIPE Solutions Vercel
 
 The GitHub `VERCEL_TOKEN` secret is scoped to this project and expires on 2027-09-07. Rotate it before expiry through Vercel and update the GitHub secret. `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are repository variables. Optional diagnostic artifact uploads are non-blocking when GitHub storage is unavailable; tests, builds and packaging remain required.
 
-The website deployment does not publish the npm package or change its alpha classification. Application secrets are unnecessary for this static site. Keep `.vercel/` local and ignored.
+Version-tag builds publish the beta npm package after both React matrix jobs pass, then deploy the website. Ordinary branch pushes deploy the site without publishing packages. Application secrets are unnecessary for this static site. Keep `.vercel/` local and ignored.
 
 ## Domain
 
@@ -31,4 +31,4 @@ Check the custom hostname, a direct `/playground` URL, JavaScript/CSS asset resp
 
 `website/articles.ts` is the shared route and documentation registry. Article Markdown feeds navigation, rendered HTML and the sitemap; the API article imports `docs/api.md` directly. Each route gets a title, description, canonical URL, OpenGraph and social metadata. `social.svg` is the source for the 1200 × 630 social PNG. `npm run test:website` checks static metadata, internal links and compiles the React Data Inspector documentation snippets. Browser tests run against the production build, including JavaScript-disabled documentation and hydration.
 
-Registry publication is verified on each website build; network/registry errors fail the build instead of publishing stale installation claims. After an npm release, trigger the Verify workflow on main to refresh installation copy. The website does not publish packages.
+Registry publication is verified on each website build; network/registry errors fail the build instead of publishing stale installation claims. After successful npm publication, the same workflow rebuilds the website against registry metadata. A failed publication prevents the release deployment. See [releasing](releasing.md).

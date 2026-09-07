@@ -352,13 +352,18 @@ pre {
   max-height: 400px;
   overflow: auto;
 }
-.design-system [data-rdi-node] {
+.design-system [data-rdi-node],
+.design-system [data-rdi-closing] {
   padding-inline-start: calc(var(--rdi-depth) * 20px);
   height: 36px;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.design-system [data-rdi-closing] {
+  padding-inline-start: calc(var(--rdi-depth) * 20px + 33px);
+  gap: 0;
 }
 .design-system [data-rdi-toggle] {
   width: 25px;

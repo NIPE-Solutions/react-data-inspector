@@ -74,7 +74,7 @@ export function Playground() {
               then take the code.
             </p>
           </div>
-          <span className="version">Alpha preview</span>
+          <span className="version">Beta preview</span>
         </div>
         <div className="lab-layout">
           <aside className="lab-nav">

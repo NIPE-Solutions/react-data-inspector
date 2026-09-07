@@ -11,7 +11,13 @@ import type { DataInspectorProps, InspectorSlotProps } from './contracts'
 import type { InspectorMessages } from './messages'
 import { formatPath, pathEqual } from './model/path'
 import { SlotBoundary } from './SlotBoundary'
-import { ClassicKey, ClassicSummary, Delimiter } from './presentation'
+import {
+  ClassicKey,
+  ClassicSummary,
+  Delimiter,
+  classicDelimiters,
+  classicHidesKey,
+} from './presentation'
 interface Props {
   rows: readonly Node[]
   props: DataInspectorProps
@@ -73,34 +79,75 @@ export function Tree({
     typeof props.virtualization === 'object'
       ? (props.virtualization.overscan ?? 8)
       : 8
-  const virtual =
-    mounted && props.virtualization !== false && rows.length > threshold
-  const from = virtual
-      ? Math.max(0, Math.floor(scroll / height) - overscan)
-      : 0,
-    to = virtual
-      ? Math.min(
-          rows.length,
-          Math.ceil((scroll + viewport) / height) + overscan,
-        )
-      : rows.length
-  const { children, indices, ends } = useMemo(() => {
+  const classic = props.presentation === 'classic'
+  const {
+    children,
+    indices,
+    ends,
+    starts,
+    visualEnds,
+    closing,
+    visualCount,
+    summaries,
+  } = useMemo(() => {
     const children = new Map<string | null, Node[]>(),
       indices = new Map<string, number>(),
       ends = new Map<string, number>(),
-      stack: Node[] = []
+      starts = new Map<string, number>(),
+      visualEnds = new Map<string, number>(),
+      closing = new Map<string, { offset: number; character: string }>(),
+      summaries = new Map<string, string>()
     rows.forEach((node, index) => {
-      while (stack.length && stack[stack.length - 1]!.depth >= node.depth)
-        ends.set(stack.pop()!.id, index)
-      stack.push(node)
       indices.set(node.id, index)
       const list = children.get(node.parentId) ?? []
       list.push(node)
       children.set(node.parentId, list)
     })
-    while (stack.length) ends.set(stack.pop()!.id, rows.length)
-    return { children, indices, ends }
-  }, [rows])
+    let visualCount = 0
+    const stack: Node[] = []
+    const finish = (node: Node, index: number) => {
+      if (
+        classic &&
+        !props.components?.Value &&
+        isExpanded(node) &&
+        children.has(node.id)
+      ) {
+        const text = m.summary(node)
+        summaries.set(node.id, text)
+        const delimiters = classicDelimiters(node, text)
+        if (delimiters)
+          closing.set(node.id, {
+            offset: visualCount++,
+            character: delimiters[1],
+          })
+      }
+      ends.set(node.id, index)
+      visualEnds.set(node.id, visualCount)
+    }
+    rows.forEach((node, index) => {
+      while (stack.length && stack[stack.length - 1]!.depth >= node.depth)
+        finish(stack.pop()!, index)
+      starts.set(node.id, visualCount++)
+      stack.push(node)
+    })
+    while (stack.length) finish(stack.pop()!, rows.length)
+    return {
+      children,
+      indices,
+      ends,
+      starts,
+      visualEnds,
+      closing,
+      visualCount,
+      summaries,
+    }
+  }, [rows, classic, isExpanded, props.components?.Value, m.summary])
+  const virtual =
+    mounted && props.virtualization !== false && visualCount > threshold
+  const from = virtual ? Math.max(0, Math.floor(scroll / height) - overscan) : 0
+  const to = virtual
+    ? Math.min(visualCount, Math.ceil((scroll + viewport) / height) + overscan)
+    : visualCount
   const activeIndex = indices.get(active.id) ?? 0
   useEffect(() => {
     const tree = treeRef.current
@@ -112,8 +159,7 @@ export function Tree({
     if (bounds.top < frame.top) tree.scrollTop += bounds.top - frame.top
     else if (bounds.bottom > frame.top + tree.clientHeight)
       tree.scrollTop += bounds.bottom - frame.top - tree.clientHeight
-  }, [activeIndex, height, treeRef])
-  const classic = props.presentation === 'classic'
+  }, [activeIndex, starts.get(active.id), height, treeRef, classic])
   const typeAhead = useRef({ text: '', time: 0 })
   function keyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (e.target !== e.currentTarget) return
@@ -173,16 +219,23 @@ export function Tree({
     for (const node of list) {
       const index = indices.get(node.id)!,
         end = ends.get(node.id)!,
+        visualStart = starts.get(node.id)!,
+        visualEnd = visualEnds.get(node.id)!,
+        close = closing.get(node.id),
         containsActive = index <= activeIndex && end > activeIndex
-      if (virtual && (end <= from || index >= to) && !containsActive) {
-        gap += end - index
+      if (
+        virtual &&
+        (visualEnd <= from || visualStart >= to) &&
+        !containsActive
+      ) {
+        gap += visualEnd - visualStart
         continue
       }
       flush()
       const rowVisible =
         index === 0 ||
         !virtual ||
-        (index >= from && index < to) ||
+        (visualStart >= from && visualStart < to) ||
         index === activeIndex
       const slot: InspectorSlotProps = {
         node,
@@ -193,7 +246,7 @@ export function Tree({
       const { Toggle, Key, Value, Reference } = props.components ?? {}
       const text = node.reference
         ? m[node.reference.kind](formatPath(node.reference.path))
-        : m.summary(node)
+        : (summaries.get(node.id) ?? m.summary(node))
       const matches =
         !!query &&
         (node.label + ' ' + node.searchText)
@@ -261,23 +314,27 @@ export function Tree({
                   </SlotBoundary>
                 ) : null}
               </button>
-              <span data-rdi-key>
-                <SlotBoundary
-                  fallback={m.rendererFailed}
-                  resetKey={[node, Key]}
-                >
-                  {Key ? (
-                    <Key {...slot} />
-                  ) : classic ? (
-                    <ClassicKey node={node} label={m.nodeLabel(node)} />
-                  ) : (
-                    m.nodeLabel(node)
-                  )}
-                </SlotBoundary>
-              </span>
-              <span data-rdi-separator aria-hidden="true">
-                :
-              </span>
+              {(!classic || Key || !classicHidesKey(node)) && (
+                <>
+                  <span data-rdi-key>
+                    <SlotBoundary
+                      fallback={m.rendererFailed}
+                      resetKey={[node, Key]}
+                    >
+                      {Key ? (
+                        <Key {...slot} />
+                      ) : classic ? (
+                        <ClassicKey node={node} label={m.nodeLabel(node)} />
+                      ) : (
+                        m.nodeLabel(node)
+                      )}
+                    </SlotBoundary>
+                  </span>
+                  <span data-rdi-separator aria-hidden="true">
+                    :
+                  </span>
+                </>
+              )}
               <span data-rdi-value>
                 <SlotBoundary
                   fallback={m.rendererFailed}
@@ -302,6 +359,7 @@ export function Tree({
                     <ClassicSummary
                       node={node}
                       text={text}
+                      multiline={!!close}
                       empty={
                         slot.expanded &&
                         !children.has(node.id) &&
@@ -314,9 +372,12 @@ export function Tree({
                     text
                   )}
                 </SlotBoundary>
-                {classic && !node.synthetic && node.position < node.setSize && (
-                  <Delimiter kind="comma">,</Delimiter>
-                )}
+                {classic &&
+                  !close &&
+                  !node.synthetic &&
+                  node.position < node.setSize && (
+                    <Delimiter kind="comma">,</Delimiter>
+                  )}
               </span>
             </div>
           ) : (
@@ -325,6 +386,21 @@ export function Tree({
           {children.has(node.id) && (
             <div role="group">{renderList(node.id)}</div>
           )}
+          {close &&
+            (!virtual || (close.offset >= from && close.offset < to) ? (
+              <div
+                data-rdi-closing
+                aria-hidden="true"
+                style={{ '--rdi-depth': node.depth } as CSSProperties}
+              >
+                <Delimiter kind="close">{close.character}</Delimiter>
+                {!node.synthetic && node.position < node.setSize && (
+                  <Delimiter kind="comma">,</Delimiter>
+                )}
+              </div>
+            ) : (
+              <div aria-hidden="true" style={{ height }} />
+            ))}
         </div>,
       )
     }

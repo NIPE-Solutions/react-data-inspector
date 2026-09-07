@@ -31,7 +31,7 @@ Large ranges subdivide hierarchically instead of creating hundreds of thousands 
 
 ## Window geometry
 
-The virtualizer measures a uniform row height. Both built-in [presentations](/guides/presentation) use the same meaningful rows and preserve this model; classic punctuation adds no closing-delimiter rows.
+The virtualizer measures a uniform row height. Both built-in [presentations](/guides/presentation) use the same meaningful rows and preserve this model; classic closing lines contribute visual offsets without adding navigable data nodes.
 
 Custom content that wraps or varies in height is unsupported by the current virtualizer. Use `virtualization={false}` for variable-height rows. This disables windowing only: grouping and the 10,000-row visible-model limit still apply.
 

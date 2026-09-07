@@ -45,19 +45,46 @@ jobs:
           RESULT: ${{ needs.test.result }}
         run: test "$RESULT" = success
 
+  publish:
+    name: Publish beta package
+    needs: verify
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - run: node scripts/validate-release.mjs
+      - run: npm run build
+      - run: npm run test:package
+      - name: Publish verified beta with provenance
+        run: npm publish --tag beta --access public --provenance
+        env:
+          # Used only to bootstrap the first package publication, then removed.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
+
   deploy:
     name: Deploy website
-    needs: verify
-    if: github.event_name != 'pull_request'
+    needs: [verify, publish]
+    if: always() && needs.verify.result == 'success' && github.event_name != 'pull_request' && ((github.ref_type == 'tag' && needs.publish.result == 'success') || (github.ref_type != 'tag' && needs.publish.result == 'skipped'))
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      name: ${{ (github.ref == 'refs/heads/main' || github.ref_type == 'tag') && 'production' || 'preview' }}
       url: ${{ steps.deploy.outputs.url }}
     env:
       VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      DEPLOY_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      DEPLOY_ENVIRONMENT: ${{ (github.ref == 'refs/heads/main' || github.ref_type == 'tag') && 'production' || 'preview' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -38,6 +38,7 @@ const cases: Record<string, Omit<DataInspectorProps, 'presentation'>> = {
 const results = Object.entries(cases).map(([name, props]) => {
   const timings = { inspector: [] as number[], classic: [] as number[] }
   const rowCounts = { inspector: 0, classic: 0 }
+  const closingLines = { inspector: 0, classic: 0 }
   for (let iteration = -1; iteration < samples; iteration++) {
     const order =
       iteration % 2 === 0
@@ -50,6 +51,9 @@ const results = Object.entries(cases).map(([name, props]) => {
       )
       const elapsed = performance.now() - start
       rowCounts[presentation] = (html.match(/data-rdi-node=/g) ?? []).length
+      closingLines[presentation] = (
+        html.match(/data-rdi-closing=/g) ?? []
+      ).length
       if (iteration >= 0) timings[presentation].push(elapsed)
     }
   }
@@ -66,6 +70,11 @@ const results = Object.entries(cases).map(([name, props]) => {
   return {
     name,
     dataRows: rowCounts.inspector,
+    visualLines: {
+      inspector: rowCounts.inspector + closingLines.inspector,
+      classic: rowCounts.classic + closingLines.classic,
+    },
+    closingLines,
     inspector: summarize(timings.inspector),
     classic: summarize(timings.classic),
   }
@@ -82,7 +91,7 @@ process.stdout.write(
         cpu: cpus()[0]?.model,
       },
       methodology:
-        'Paired in-process React SSR; one warmup per mode and fixture, ten measured samples, alternating mode order. Dataset construction excluded. Each render creates the same model and visible rows. No client windowing, scrolling, or browser timings. Deep fixture reaches the default maximum depth (100); wide and 500k cases use default grouping. Open-range fixture explicitly expands the first 10k range and first 100-value subrange. Customization, themes, and actions use defaults. Samples are descriptive, not timing assertions.',
+        'Paired in-process React SSR; one warmup per mode and fixture, ten measured samples, alternating mode order. Dataset construction excluded. Each render creates the same model and data rows. Classic adds separate decorative closing lines; visual-line counts are reported independently. No client windowing, scrolling, or browser timings. Deep fixture reaches the default maximum depth (100); wide and 500k cases use default grouping. Open-range fixture explicitly expands the first 10k range and first 100-value subrange. Customization, themes, and actions use defaults. Samples are descriptive, not timing assertions.',
       results,
     },
     null,

@@ -90,7 +90,7 @@ export const scenarios = {
   },
   collections: {
     title: 'Map & Set',
-    note: 'Map keys can be objects. Entry addresses are explicitly distinct from object properties. The alpha inspects the first 10,000 collection entries.',
+    note: 'Map keys can be objects. Entry addresses are explicitly distinct from object properties. The beta inspects the first 10,000 collection entries.',
     create() {
       const key = { tenant: 42 }
       return {

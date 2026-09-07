@@ -63,4 +63,4 @@ Choose [classic presentation](/guides/presentation) for a more traditional objec
 
 ## Check the boundary before adoption
 
-Read the [limitations](/limitations) and [accessibility audit status](/accessibility) for the current alpha. A successful local example does not replace testing with your application's data, customizations, and assistive technologies.
+Read the [limitations](/limitations) and [accessibility audit status](/accessibility) for the current beta. A successful local example does not replace testing with your application's data, customizations, and assistive technologies.

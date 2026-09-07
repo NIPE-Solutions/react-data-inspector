@@ -10,7 +10,7 @@ const response = await fetch(
 let version = ''
 if (response.ok) {
   const data = await response.json()
-  version = data['dist-tags']?.latest || data['dist-tags']?.alpha || ''
+  version = data['dist-tags']?.latest || data['dist-tags']?.beta || ''
   if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version))
     throw Error('Registry returned no valid release version')
 } else if (response.status !== 404)

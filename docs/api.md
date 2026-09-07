@@ -99,6 +99,6 @@ The canonical [styling reference](https://react-data-inspector.nipesolutions.com
 
 ## Presentation
 
-`presentation="inspector"` is the default. `presentation="classic"` changes built-in visual notation using quoted property keys and balanced inline container delimiters. It adds no closing-delimiter rows or selectable synthetic punctuation. Both presentations share paths, graph identity, search, selection, expansion, actions, grouping, virtualization, and SSR behavior.
+`presentation="inspector"` is the default. `presentation="classic"` changes built-in visual notation using quoted property keys and multiline container delimiters. Closing-delimiter lines are decorative and aria-hidden; they add visual offsets but no selectable data nodes. Both presentations share paths, graph identity, search, selection, expansion, actions, grouping, virtualization, and SSR behavior.
 
 Classic output is not serialized JSON or executable JavaScript. Non-JSON type summaries and separately addressed Map key/value rows retain their meaning. See [presentation modes](https://react-data-inspector.nipesolutions.com/guides/presentation) for examples and customization boundaries.

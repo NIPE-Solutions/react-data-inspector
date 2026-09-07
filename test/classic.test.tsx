@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { hydrateRoot } from 'react-dom/client'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { renderToString } from 'react-dom/server'
 import { expect, it, vi } from 'vitest'
 import { DataInspector, defineInspectorType } from '../src'
@@ -37,7 +38,9 @@ it('adds classic syntax without changing SSR tree names or data row counts', () 
     'data-rdi-presentation',
     'classic',
   )
-  expect(classic!.querySelector('[data-rdi-key]')?.textContent).toBe('$')
+  expect(
+    classic!.querySelector('[data-rdi-node]')?.querySelector('[data-rdi-key]'),
+  ).toBeNull()
   expect(classic!.textContent).toContain('"user"')
   expect(classic!.textContent).toContain('Date("2026-09-07T09:00:00.000Z")')
   expect(classic!.textContent).toContain('Map(1)')
@@ -237,4 +240,111 @@ it('formats a built-in even when an unmatched custom definition uses the same ty
   expect(container.querySelector('[data-rdi-value]')?.textContent).toBe(
     'Date("2026-09-07T09:00:00.000Z")',
   )
+})
+
+it('renders nested classic JSON syntax as separate balanced visual lines', () => {
+  const { container } = render(
+    <DataInspector
+      presentation="classic"
+      value={{
+        user: { name: 'Nicholas', active: true },
+        items: [1, 2],
+        count: 42,
+      }}
+      defaultExpandedDepth={3}
+    />,
+  )
+  const lines = [
+    ...container.querySelectorAll('[data-rdi-node], [data-rdi-closing]'),
+  ].map((row) => {
+    const clone = row.cloneNode(true) as HTMLElement
+    clone
+      .querySelectorAll('[data-rdi-toggle]')
+      .forEach((toggle) => toggle.remove())
+    return clone.textContent
+  })
+  expect(lines).toEqual([
+    '{',
+    '"user":{',
+    '"name":"Nicholas",',
+    '"active":true',
+    '},',
+    '"items":[',
+    '1,',
+    '2',
+    '],',
+    '"count":42',
+    '}',
+  ])
+  expect(container.querySelectorAll('[role=treeitem]')).toHaveLength(8)
+  for (const closing of container.querySelectorAll('[data-rdi-closing]')) {
+    expect(closing).toHaveAttribute('aria-hidden', 'true')
+    expect(closing).not.toHaveAttribute('tabindex')
+    expect(closing).not.toHaveAttribute('role', 'treeitem')
+  }
+})
+
+it('hydrates multiline SSR before enabling the client visual window', async () => {
+  const value = Array.from({ length: 300 }, (_, id) => ({ id }))
+  const element = (
+    <StrictMode>
+      <DataInspector
+        value={value}
+        presentation="classic"
+        defaultExpandedDepth={2}
+      />
+    </StrictMode>
+  )
+  const container = document.createElement('div')
+  container.innerHTML = renderToString(element)
+  expect(container.querySelectorAll('[data-rdi-closing]')).toHaveLength(301)
+  document.body.append(container)
+  const recoverableError = vi.fn()
+  let root: ReturnType<typeof hydrateRoot> | undefined
+  try {
+    await act(async () => {
+      root = hydrateRoot(container, element, {
+        onRecoverableError: recoverableError,
+      })
+    })
+    expect(recoverableError).not.toHaveBeenCalled()
+    expect(container.querySelectorAll('[data-rdi-node]').length).toBeLessThan(
+      50,
+    )
+    expect(
+      container.querySelectorAll('[data-rdi-closing]').length,
+    ).toBeLessThan(50)
+  } finally {
+    await act(async () => {
+      root?.unmount()
+    })
+    container.remove()
+  }
+})
+
+it('keeps custom child labels even when a domain type id resembles a binary address', () => {
+  class DomainValue {}
+  const type = defineInspectorType<DomainValue>({
+    id: 'dataview-byte',
+    matches: (value): value is DomainValue => value instanceof DomainValue,
+    summary: () => 'Domain value',
+    children: () => ({
+      count: 1,
+      getPage: () => [{ key: 'amount', value: 12.99 }],
+    }),
+  })
+  const { container } = render(
+    <DataInspector
+      value={new DomainValue()}
+      types={[type]}
+      presentation="classic"
+      defaultExpandedDepth={2}
+    />,
+  )
+  expect(
+    container.querySelector('[data-depth="1"] [data-rdi-key]')?.textContent,
+  ).toBe('"amount"')
+  expect(
+    screen.getByRole('treeitem', { name: 'amount: 12.99' }),
+  ).toBeInTheDocument()
 })

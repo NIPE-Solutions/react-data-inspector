@@ -2,7 +2,7 @@
 
 A structured JavaScript data inspector for React: inspect the value you actually have.
 
-**Alpha package, not yet published to npm.** [Website](https://react-data-inspector.nipesolutions.com) · [Playground](https://react-data-inspector.nipesolutions.com/playground) · [Documentation](https://react-data-inspector.nipesolutions.com/docs). Run `npm install && npm run dev` locally. See [release readiness](docs/release-readiness.md) before production adoption.
+**Beta release channel.** [Website](https://react-data-inspector.nipesolutions.com) · [Playground](https://react-data-inspector.nipesolutions.com/playground) · [Documentation](https://react-data-inspector.nipesolutions.com/docs). Run `npm install && npm run dev` locally. See [release readiness](docs/release-readiness.md) before production adoption.
 
 ```tsx
 import { DataInspector } from '@nipe-solutions/react-data-inspector'
@@ -11,7 +11,11 @@ import '@nipe-solutions/react-data-inspector/styles.css'
 ;<DataInspector value={data} />
 ```
 
-Until publication, run `npm run build && npm pack` and install the generated tarball in your application.
+Install the beta release:
+
+```sh
+npm install @nipe-solutions/react-data-inspector@beta
+```
 
 ## Why this exists
 
@@ -49,7 +53,7 @@ Prefer quoted keys and object-viewer syntax? Set `presentation="classic"`; see [
 
 See the [compiled customization examples](examples/customization.tsx), [API reference](docs/api.md), [architecture and type matrix](docs/architecture.md), and [performance methodology](benchmarks/README.md).
 
-The alpha is read-only; editing is not part of the public API. Getters are not evaluated, promises are not awaited, functions are not executed, and WeakMap/WeakSet contents remain opaque. Collection paths are not presented as JSON Pointers.
+The beta is read-only; editing is not part of the public API. Getters are not evaluated, promises are not awaited, functions are not executed, and WeakMap/WeakSet contents remain opaque. Collection paths are not presented as JSON Pointers.
 
 ## Development
 

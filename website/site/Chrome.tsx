@@ -89,14 +89,14 @@ export function Installation({ compact = false }: { compact?: boolean }) {
         </>
       ) : (
         <>
-          <p>Alpha source preview · npm release pending</p>
+          <p>Beta source preview · npm release pending</p>
           {!compact && (
             <>
               <p>
                 The repository is public. Build and install the package locally
                 while the npm release is being prepared.
               </p>
-              <Code>{`git clone ${repository}.git\ncd react-data-inspector\nnpm ci\nnpm run build\nnpm pack\n# In your React application, use the path to the generated .tgz:\nnpm install /path/to/nipe-solutions-react-data-inspector-0.1.0-alpha.0.tgz`}</Code>
+              <Code>{`git clone ${repository}.git\ncd react-data-inspector\nnpm ci\nnpm run build\nnpm pack\n# In your React application, use the path to the generated .tgz:\nnpm install /path/to/nipe-solutions-react-data-inspector-0.1.0-beta.0.tgz`}</Code>
             </>
           )}
         </>
