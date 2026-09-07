@@ -43,7 +43,7 @@ Built-in subclasses are identified through bounded prototype descriptor inspecti
 
 ## Accessibility architecture
 
-The labelled tree owns nested treeitems and groups. Items have explicit level, position and sibling count. The tree itself is the navigation tab stop and uses aria-activedescendant pointing to a mounted item. Focus is independent of selection. Collapsing or removing a focused descendant falls back to a surviving ancestor. Keyboard controls include arrows, Home/End, type-ahead, Enter/Space selection, and F2 actions.
+The labelled tree owns nested treeitems and groups. Items have explicit level, position and sibling count. The tree itself is the navigation tab stop and uses aria-activedescendant pointing to a mounted item. Focus is independent of selection. Collapsing or removing a focused descendant falls back to a surviving ancestor. Keyboard controls include arrows, Home/End, type-ahead, Enter activation (toggle a branch, follow a reference, or select a leaf), Space selection, and F2 actions. Clicking reference text reveals and selects its original; the action menu provides the same jump. Search Enter advances and Shift+Enter moves backwards.
 
 Search controls and the current-node action panel are outside the tree. They use normal buttons, status regions and form controls. Custom content slots retain library-owned tree and toggle semantics. Uniform measured rows support bounded windowing; custom variable-height rows require disabling virtualization. The public-beta gate includes actual screen-reader testing; axe alone cannot establish this.
 

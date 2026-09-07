@@ -36,7 +36,11 @@ it('jumping to a hidden original expands its ancestors', () => {
   fireEvent.click(screen.getByRole('button', { name: 'Expand right' }))
   fireEvent.click(screen.getByRole('button', { name: 'Collapse right' }))
   fireEvent.click(screen.getByRole('button', { name: 'Expand left' }))
-  fireEvent.click(screen.getByText('↗ same reference as $.right.shared'))
+  fireEvent.click(
+    screen
+      .getByText('↗ same reference as $.right.shared')
+      .closest('[data-rdi-node]')!,
+  )
   fireEvent.click(screen.getByRole('button', { name: 'Node actions' }))
   fireEvent.click(screen.getByRole('button', { name: 'Jump to original' }))
   expect(

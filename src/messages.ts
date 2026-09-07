@@ -31,7 +31,7 @@ export const defaultMessages = {
   limited:
     'Visible row limit reached. Collapse a branch to inspect other nodes.',
   instructions:
-    'Arrow keys navigate. Enter selects. Press F2 for node actions.',
+    'Arrow keys navigate. Enter opens branches or follows references. Space selects. F2 opens actions.',
   expand: (label: string) => `Expand ${label}`,
   collapse: (label: string) => `Collapse ${label}`,
   circular: (path: string) => `↩ circular reference to ${path}`,

@@ -156,3 +156,41 @@ test('CSS-only brand colors, toggle-only slot and added actions preserve default
   await area.getByRole('button', { name: 'Open in application' }).click()
   await expect(area.locator('output')).toContainText('Customer 42 opened')
 })
+
+test('reference clicks, action jumps and Enter activate their targets', async ({
+  page,
+}) => {
+  const area = page.locator('#playground')
+  const tree = area.getByRole('tree')
+  await tree
+    .getByRole('button', { name: 'Jump to original: $.user', exact: true })
+    .click()
+  await expect(tree.locator('[data-selected=true]')).toContainText('user')
+  await expect(tree.locator('[data-focused=true] [data-rdi-key]')).toHaveText(
+    'user',
+  )
+  await expect(tree).toBeFocused()
+  await tree.press('Enter')
+  await expect(
+    tree.getByRole('button', { name: 'Collapse user' }),
+  ).toBeVisible()
+  await tree.press('Enter')
+  await expect(tree.getByRole('button', { name: 'Expand user' })).toBeVisible()
+  await tree.press('ArrowDown')
+  await tree.press('F2')
+  await area
+    .getByRole('button', { name: 'Jump to original', exact: true })
+    .click()
+  await expect(tree.locator('[data-focused=true] [data-rdi-key]')).toHaveText(
+    'user',
+  )
+  await tree.press('End')
+  await tree.press('Enter')
+  await expect(tree.locator('[data-focused=true] [data-rdi-key]')).toHaveText(
+    '$',
+  )
+  await area.getByRole('searchbox').fill('Nicholas')
+  await expect(area.getByRole('button', { name: 'Next result' })).toBeEnabled()
+  await area.getByRole('searchbox').press('Enter')
+  await expect(tree.locator('[data-selected=true]')).toContainText('Nicholas')
+})

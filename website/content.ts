@@ -19,7 +19,7 @@ export const guide = [
   {
     id: 'selection',
     title: 'Selection',
-    text: 'Focus and selection are distinct. Arrow keys move focus; Enter, Space or clicking selects. selectedPath can be null for no selection. The change callback receives both the path and a readonly node context, so an application can update an adjacent details panel. Range groups are navigation aids, not selectable data.',
+    text: 'Focus and selection are distinct. Arrow keys move focus; Space or clicking a row selects. Enter toggles branches, follows references, or selects a leaf. Clicking reference text jumps to the original. selectedPath can be null for no selection. The change callback receives both the path and a readonly node context, so an application can update an adjacent details panel. Range groups are navigation aids, not selectable data.',
   },
   {
     id: 'search',
@@ -77,7 +77,7 @@ export const guide = [
   {
     id: 'accessibility',
     title: 'Accessibility',
-    text: 'Nested treeitem/group semantics retain ownership under windowing. The tree has one navigation tab stop and active-descendant focus. Arrow keys, Home/End, type-ahead, Enter/Space and F2 are supported. Search controls and current-node actions have normal tab stops. Selection, focus and search matches have distinct styling. Automated browser checks do not establish screen-reader compatibility; manual VoiceOver and NVDA audits remain a public-beta gate.',
+    text: 'Nested treeitem/group semantics retain ownership under windowing. The tree has one navigation tab stop and active-descendant focus. Arrow keys, Home/End, type-ahead, Enter/Space and F2 are supported. Search Enter advances and Shift+Enter moves backwards. Search controls and current-node actions have normal tab stops. Selection, focus and search matches have distinct styling. Automated browser checks do not establish screen-reader compatibility; manual VoiceOver and NVDA audits remain a public-beta gate.',
   },
   {
     id: 'ssr',

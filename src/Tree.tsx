@@ -21,6 +21,7 @@ interface Props {
   toggle: (n: Node) => void
   select: (n: Node) => void
   focus: (n: Node) => void
+  jump: (n: Node) => void
   openActions: () => void
   treeRef: React.RefObject<HTMLDivElement | null>
   query: string
@@ -37,6 +38,7 @@ export function Tree({
   select,
   focus,
   openActions,
+  jump,
   treeRef,
   query,
 }: Props) {
@@ -123,7 +125,13 @@ export function Tree({
     } else if (e.key === 'ArrowLeft') {
       if (active.expandable && isExpanded(active)) toggle(active)
       else next = rows.find((n) => n.id === active.parentId)
-    } else if (e.key === 'Enter' || e.key === ' ') select(active)
+    } else if (e.key === 'Enter') {
+      if (active.reference) jump(active)
+      else {
+        select(active)
+        if (active.expandable) toggle(active)
+      }
+    } else if (e.key === ' ') select(active)
     else if (e.key === 'F2') openActions()
     else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
       const now = Date.now()
@@ -263,9 +271,18 @@ export function Tree({
                   resetKey={[node, node.reference ? Reference : Value]}
                 >
                   {node.reference ? (
-                    <span data-rdi-reference>
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      data-rdi-reference
+                      aria-label={`${m.jump}: ${formatPath(node.reference.path)}`}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        jump(node)
+                      }}
+                    >
                       {Reference ? <Reference {...slot} /> : text}
-                    </span>
+                    </button>
                   ) : Value ? (
                     <Value {...slot} />
                   ) : (

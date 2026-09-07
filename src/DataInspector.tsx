@@ -208,9 +208,9 @@ function InspectorView({
     setFocused(target.address)
     if (pendingReveal.matchPath !== null) {
       setCurrentMatch({ query, path: pendingReveal.matchPath })
-      if (props.selectedPath === undefined) setSelection(target.path)
-      props.onSelectedPathChange?.(target.path, target)
     }
+    if (props.selectedPath === undefined) setSelection(target.path)
+    props.onSelectedPathChange?.(target.path, target)
   }, [
     pendingReveal,
     query,
@@ -265,9 +265,9 @@ function InspectorView({
     setActionsOpen(false)
     treeRef.current?.focus()
   }
-  function jump() {
-    if (!active.reference) return
-    requestReveal(active.reference.path, null)
+  function jump(node: Node = active) {
+    if (!node.reference) return
+    requestReveal(node.reference.path, null)
     closeActions()
   }
   return (
@@ -286,6 +286,12 @@ function InspectorView({
             aria-label={m.search}
             placeholder={m.search}
             value={query}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+                event.preventDefault()
+                if (!searching) navigate(event.shiftKey ? -1 : 1)
+              }
+            }}
             onChange={(e) => {
               if (props.searchQuery === undefined)
                 setQuery(e.currentTarget.value)
@@ -336,6 +342,7 @@ function InspectorView({
         toggle={toggle}
         select={select}
         focus={(n) => setFocused(n.address)}
+        jump={jump}
         openActions={() => setActionsOpen(true)}
         treeRef={treeRef}
         query={query}
