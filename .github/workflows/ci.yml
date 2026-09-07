@@ -68,9 +68,6 @@ jobs:
       - run: npm run test:package
       - name: Publish verified beta with provenance
         run: npm publish --tag beta --access public --provenance
-        env:
-          # Used only to bootstrap the first package publication, then removed.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
 
   deploy:
     name: Deploy website
@@ -93,6 +90,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build:website
+        env:
+          REQUIRE_NPM_PUBLICATION: 'true'
       - name: Deploy verified website
         id: deploy
         run: node scripts/deploy-website.mjs

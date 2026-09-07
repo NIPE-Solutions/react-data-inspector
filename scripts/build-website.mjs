@@ -2,19 +2,39 @@ import { spawnSync } from 'node:child_process'
 import { mkdir, readFile, writeFile, copyFile, rm } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-// Publication is checked at build time so installation copy follows the registry.
-const response = await fetch(
-  'https://registry.npmjs.org/@nipe-solutions%2freact-data-inspector',
-  { signal: AbortSignal.timeout(20000) },
-)
+// Resolve dist-tags directly: the package document can retain a cached 404
+// briefly after first publication even when version endpoints are available.
+const requiredPublication = process.env.REQUIRE_NPM_PUBLICATION === 'true'
 let version = ''
-if (response.ok) {
-  const data = await response.json()
-  version = data['dist-tags']?.latest || data['dist-tags']?.beta || ''
-  if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version))
-    throw Error('Registry returned no valid release version')
-} else if (response.status !== 404)
-  throw Error(`Cannot verify npm publication: ${response.status}`)
+for (let attempt = 0; attempt < (requiredPublication ? 6 : 1); attempt++) {
+  for (const tag of ['latest', 'beta']) {
+    const response = await fetch(
+      `https://registry.npmjs.org/@nipe-solutions%2freact-data-inspector/${tag}`,
+      { signal: AbortSignal.timeout(20000) },
+    )
+    if (response.ok) {
+      const data = await response.json()
+      version = data.version
+      if (
+        typeof version !== 'string' ||
+        !/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version)
+      )
+        throw Error('Registry returned no valid release version')
+      break
+    }
+    if (response.status !== 404)
+      throw Error(`Cannot verify npm publication: ${response.status}`)
+  }
+  if (version) break
+  if (requiredPublication && attempt < 5) {
+    console.log('Waiting for npm publication to become readable…')
+    await new Promise((resolve) => setTimeout(resolve, 10000))
+  }
+}
+if (requiredPublication && !version)
+  throw Error(
+    'Published package is not readable; refusing stale installation copy',
+  )
 process.env.VITE_NPM_VERSION = version
 const run = (args) => {
   const result = spawnSync('npx', args, { stdio: 'inherit', env: process.env })
