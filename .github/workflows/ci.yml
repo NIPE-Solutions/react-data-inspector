@@ -25,8 +25,11 @@ jobs:
       - run: npm run benchmark
       - uses: actions/upload-artifact@v4
         if: always()
+        # Diagnostic uploads must not fail verification when org storage is full.
+        continue-on-error: true
         with:
           name: evidence-react-${{ matrix.react }}
+          retention-days: 7
           path: |
             test-results/
             benchmarks/results.json
@@ -41,3 +44,39 @@ jobs:
         env:
           RESULT: ${{ needs.test.result }}
         run: test "$RESULT" = success
+
+  deploy:
+    name: Deploy website
+    needs: verify
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      DEPLOY_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm install --global vercel@59.11.7
+      - name: Load Vercel project configuration
+        run: vercel pull --yes --environment="$DEPLOY_ENVIRONMENT" --token="$VERCEL_TOKEN"
+      - name: Build deployment artifact
+        run: |
+          flags=()
+          if [ "$DEPLOY_ENVIRONMENT" = production ]; then flags+=(--prod); fi
+          vercel build "${flags[@]}" --token="$VERCEL_TOKEN"
+      - name: Deploy verified website
+        id: deploy
+        run: |
+          flags=()
+          if [ "$DEPLOY_ENVIRONMENT" = production ]; then flags+=(--prod); fi
+          url=$(vercel deploy --prebuilt --yes "${flags[@]}" --token="$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
