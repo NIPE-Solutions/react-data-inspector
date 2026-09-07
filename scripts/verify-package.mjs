@@ -74,6 +74,40 @@ try {
     ],
     { cwd: dir, stdio: 'inherit' },
   )
+  for (const [input, output] of [
+    ['examples/live-updates.tsx', 'live-updates.tsx'],
+    ['examples/live-data.ts', 'live-data.ts'],
+    ['examples/customization.tsx', 'customization.tsx'],
+    ['website/playground/scenarios.tsx', 'scenarios.tsx'],
+  ]) {
+    const code = readFileSync(input, 'utf8')
+      .replaceAll("'../src'", "'@nipe-solutions/react-data-inspector'")
+      .replaceAll("'../../src'", "'@nipe-solutions/react-data-inspector'")
+      .replaceAll("'../../examples/customization'", "'./customization'")
+    writeFileSync(join(dir, output), code)
+  }
+  execFileSync(
+    process.execPath,
+    [
+      resolve('node_modules/typescript/bin/tsc'),
+      '--noEmit',
+      '--strict',
+      '--noUncheckedIndexedAccess',
+      '--exactOptionalPropertyTypes',
+      '--jsx',
+      'react-jsx',
+      '--target',
+      'ES2022',
+      '--module',
+      'ESNext',
+      '--moduleResolution',
+      'Bundler',
+      'live-updates.tsx',
+      'customization.tsx',
+      'scenarios.tsx',
+    ],
+    { cwd: dir, stdio: 'inherit' },
+  )
   const gzip = gzipSync(readFileSync('dist/index.js')).length
   assert(gzip < 18000, `Runtime gzip ${gzip} exceeds 18KB review budget`)
   console.log(

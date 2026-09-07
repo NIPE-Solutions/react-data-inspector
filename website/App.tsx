@@ -111,7 +111,7 @@ export function App() {
           </span>
         </a>
         <nav aria-label="Main">
-          <a href="#playground">Playground</a>
+          <a href="/playground">Playground</a>
           <a href="#customize">Customization</a>
           <a href="#docs">Documentation</a>
           <a href="https://github.com/NIPE-Solutions/react-data-inspector">

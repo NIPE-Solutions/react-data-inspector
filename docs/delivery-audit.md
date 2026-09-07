@@ -56,3 +56,5 @@ Cycle and shared-reference tests distinguish semantics without recursion; getter
 ## Accessibility audit
 
 Keyboard-only behavior, collapse/focus restoration, selection, search, actions, RTL/mobile and windowed active descendants have automated interaction coverage and live browser inspection. Axe passes the default and dark examples. No human screen-reader audit was performed. Editing accessibility is not applicable to this read-only alpha. See the public-beta blockers before describing the project as production-ready.
+
+The dedicated [playground](playground.md) now includes externally updated data, typed-value scenarios, styling controls, lazy children and opt-in performance measurements. Standalone live examples are verified against the packed package.

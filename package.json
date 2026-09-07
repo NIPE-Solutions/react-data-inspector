@@ -52,7 +52,8 @@
     "benchmark:memory": "node --expose-gc --import tsx benchmarks/memory.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "benchmark:browser": "node benchmarks/browser.mjs"
+    "benchmark:browser": "node benchmarks/browser.mjs",
+    "build:website:profile": "vite build --config website/vite.config.ts --mode profiling"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

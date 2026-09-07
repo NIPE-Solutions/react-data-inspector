@@ -4,3 +4,5 @@ website/dist/
 test-results/
 playwright-report/
 package-lock.json
+
+website/dist-profiling/

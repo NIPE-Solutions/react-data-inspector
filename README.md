@@ -57,3 +57,5 @@ npm run benchmark
 ```
 
 [MIT](LICENSE) · [NIPE Open Source](https://oss.nipesolutions.com)
+
+The [playground guide](docs/playground.md) covers live external updates, type scenarios, customization and opt-in measurements. Run `npm run dev` and open `/playground`.
