@@ -1,0 +1,10 @@
+[
+  "LICENSE",
+  "README.md",
+  "dist/index.cjs",
+  "dist/index.d.cts",
+  "dist/index.d.ts",
+  "dist/index.js",
+  "dist/styles.css",
+  "package.json"
+]
