@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import {
+  createNpmPaths,
   formatCommandError,
+  runNpm,
   sanitizeNpmEnvironment,
   validatePackageManifest,
   validatePackedFiles,
@@ -101,6 +104,43 @@ test('npm environment uses isolated configuration without credentials', () => {
   assert.equal(result.NPM_CONFIG_UPDATE_NOTIFIER, 'false')
 })
 
+test('npm commands ignore a package-local project configuration', async () => {
+  const temporaryRoot = await mkdtemp(
+    path.join(tmpdir(), 'react-data-inspector-npm-config-'),
+  )
+  try {
+    const hostilePackage = path.join(temporaryRoot, 'package')
+    await mkdir(hostilePackage)
+    await writeFile(
+      path.join(hostilePackage, '.npmrc'),
+      [
+        'registry=https://registry.example.invalid/',
+        'custom-project-setting=loaded',
+        '//registry.npmjs.org/:_authToken=project-secret',
+      ].join('\n'),
+    )
+    const npmPaths = await createNpmPaths(temporaryRoot)
+    const loadedFromProject = JSON.parse(
+      (await runNpm(['config', 'list', '--json'], hostilePackage, npmPaths))
+        .stdout,
+    )
+    const { stdout } = await runNpm(
+      ['config', 'list', '--json'],
+      npmPaths.workspace,
+      npmPaths,
+    )
+    const config = JSON.parse(stdout)
+
+    assert.equal(loadedFromProject['custom-project-setting'], 'loaded')
+    assert.equal(config['custom-project-setting'], undefined)
+    assert.equal(config.registry, 'https://registry.npmjs.org/')
+    assert.doesNotMatch(stdout, /project-secret|registry\.example\.invalid/)
+    assert.notEqual(npmPaths.workspace, hostilePackage)
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true })
+  }
+})
+
 test('stable package manifest exposes only the supported consumer contract', () => {
   assert.doesNotThrow(() =>
     validatePackageManifest(stableManifest, {
@@ -138,6 +178,30 @@ test('stable package manifest exposes only the supported consumer contract', () 
       ),
     /postinstall lifecycle script/,
   )
+  for (const lifecycle of [
+    'preprepare',
+    'postprepare',
+    'dependencies',
+    'prepack',
+    'postpack',
+    'publish',
+    'postpublish',
+  ]) {
+    assert.throws(
+      () =>
+        validatePackageManifest(
+          {
+            ...stableManifest,
+            scripts: {
+              ...stableManifest.scripts,
+              [lifecycle]: 'node unexpected.mjs',
+            },
+          },
+          { version: '1.0.0', tag: 'latest' },
+        ),
+      new RegExp(`${lifecycle} lifecycle script`),
+    )
+  }
 })
 
 test('command failures include captured compiler diagnostics', () => {

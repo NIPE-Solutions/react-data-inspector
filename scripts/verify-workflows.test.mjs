@@ -135,6 +135,10 @@ test('workflow validators reject weakened trust boundaries', async () => {
     (copy) => (copy.jobs.publish.permissions = { contents: 'write' }),
     (copy) => copy.jobs.publish.steps.unshift({ uses: 'actions/checkout@v7' }),
     (copy) =>
+      copy.jobs.publish.steps.splice(1, 0, {
+        uses: 'example/unreviewed-action@v1',
+      }),
+    (copy) =>
       (findAction(copy.jobs.publish, 'actions/download-artifact').with.name =
         'different-artifact'),
     (copy) => (copy.jobs.deploy.permissions = { 'id-token': 'write' }),
@@ -370,6 +374,8 @@ function validateReleaseWorkflow(workflow) {
     'npm run test:e2e',
     'npm run release:check -- --dry-run --output release-artifact',
     'npm run benchmark',
+    'npm run benchmark:memory',
+    'npm run benchmark:browser',
   ])
   const releaseStep = findRun(verify, 'npm run release:check')
   assert.equal(releaseStep.id, 'release')
@@ -390,6 +396,7 @@ function validateReleaseWorkflow(workflow) {
   assert.ok(publish['timeout-minutes'] > 0)
   assert.ok(publish['timeout-minutes'] <= 10)
   assert.deepEqual(publish.permissions, { 'id-token': 'write' })
+  assert.equal(stepsFor(publish).length, 3)
   assert.equal(
     stepsFor(publish).some((step) =>
       step.uses?.startsWith('actions/checkout@'),
@@ -429,5 +436,6 @@ function validateReleaseWorkflow(workflow) {
   ])
   assert.deepEqual(findRun(deploy, 'npm run build:website').env, {
     REQUIRE_NPM_PUBLICATION: 'true',
+    EXPECTED_NPM_VERSION: '1.0.0',
   })
 }

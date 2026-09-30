@@ -2,41 +2,18 @@ import { spawnSync } from 'node:child_process'
 import { mkdir, readFile, writeFile, copyFile, rm } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { resolvePublishedVersion } from './website-version.mjs'
 const requiredPublication = process.env.REQUIRE_NPM_PUBLICATION === 'true'
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
 // Local and verification builds describe their source candidate. Deployment
-// builds resolve npm directly and refuse installation copy for an unpublished
-// version. The existing beta is a bridge only until the first stable publish.
-let version = requiredPublication ? '' : packageJson.version
-for (let attempt = 0; attempt < (requiredPublication ? 6 : 0); attempt++) {
-  for (const tag of ['latest', 'beta']) {
-    const response = await fetch(
-      `https://registry.npmjs.org/@nipe-solutions%2freact-data-inspector/${tag}`,
-      { signal: AbortSignal.timeout(20000) },
-    )
-    if (response.ok) {
-      const data = await response.json()
-      version = data.version
-      if (
-        typeof version !== 'string' ||
-        !/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version)
-      )
-        throw Error('Registry returned no valid release version')
-      break
-    }
-    if (response.status !== 404)
-      throw Error(`Cannot verify npm publication: ${response.status}`)
-  }
-  if (version) break
-  if (requiredPublication && attempt < 5) {
-    console.log('Waiting for npm publication to become readable…')
-    await new Promise((resolve) => setTimeout(resolve, 10000))
-  }
-}
-if (requiredPublication && !version)
-  throw Error(
-    'Published package is not readable; refusing stale installation copy',
-  )
+// builds resolve npm directly. Release deployment additionally requires the
+// exact reviewed version on latest; the prerelease bridge is available only to
+// ordinary non-release deployments during the transition.
+const version = await resolvePublishedVersion({
+  sourceVersion: packageJson.version,
+  requirePublication: requiredPublication,
+  expectedVersion: process.env.EXPECTED_NPM_VERSION,
+})
 process.env.VITE_NPM_VERSION = version
 const run = (args) => {
   const result = spawnSync('npx', args, { stdio: 'inherit', env: process.env })

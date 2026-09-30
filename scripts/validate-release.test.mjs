@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -9,6 +9,7 @@ import {
   parseArguments,
   validateReleaseMetadata,
   validateRepositoryContext,
+  writeArtifactManifest,
 } from './validate-release.mjs'
 
 const repositoryRoot = path.resolve(import.meta.dirname, '..')
@@ -293,5 +294,28 @@ test('artifact manifest binds release metadata and inventory to the tarball', as
     assert.notEqual(changed.integrity, manifest.integrity)
   } finally {
     await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('artifact manifest installation is atomic and exclusive', async () => {
+  const temporaryRoot = await mkdtemp(
+    path.join(tmpdir(), 'react-data-inspector-manifest-write-'),
+  )
+  const manifestPath = path.join(temporaryRoot, 'release-manifest.json')
+  try {
+    await writeArtifactManifest(manifestPath, { version: '1.0.0' })
+    assert.deepEqual(JSON.parse(await readFile(manifestPath, 'utf8')), {
+      version: '1.0.0',
+    })
+    await assert.rejects(
+      () => writeArtifactManifest(manifestPath, { version: 'substituted' }),
+      /EEXIST/,
+    )
+    assert.deepEqual(JSON.parse(await readFile(manifestPath, 'utf8')), {
+      version: '1.0.0',
+    })
+    assert.deepEqual(await readdir(temporaryRoot), ['release-manifest.json'])
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true })
   }
 })

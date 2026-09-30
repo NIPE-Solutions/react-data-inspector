@@ -9,6 +9,7 @@ import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
 import { gzipSync } from 'node:zlib'
+import { readDocumentationSnippets } from './documentation-snippets.mjs'
 
 const execFileAsync = promisify(execFile)
 const repositoryRoot = path.resolve(import.meta.dirname, '..')
@@ -54,7 +55,14 @@ const lifecycleScripts = [
   'postinstall',
   'prepublish',
   'prepublishOnly',
+  'preprepare',
   'prepare',
+  'postprepare',
+  'dependencies',
+  'prepack',
+  'postpack',
+  'publish',
+  'postpublish',
 ]
 
 export function validatePackedFiles(actualFiles, expectedFiles) {
@@ -200,9 +208,10 @@ export async function verifyTarballConsumers(tarballPath) {
       await verifyModulesAndSsr(consumer)
       await verifyTypes(consumer)
       await verifyExamples(consumer)
+      await verifyDocumentationExamples(consumer)
       await verifyStylesAndManifest(consumer, sourceManifest)
       console.log(
-        `${lane.label}: ESM, CJS, types, CSS, examples, and SSR passed`,
+        `${lane.label}: ESM, CJS, types, CSS, examples, docs, and SSR passed`,
       )
     }
   } finally {
@@ -229,8 +238,8 @@ export async function verifyPackage() {
       await readFile(path.join(repositoryRoot, 'package.json'), 'utf8'),
     )
     const { stdout } = await runNpm(
-      ['pack', '--json', '--pack-destination', packDirectory],
-      repositoryRoot,
+      ['pack', repositoryRoot, '--json', '--pack-destination', packDirectory],
+      npmPaths.workspace,
       npmPaths,
     )
     const [pack] = JSON.parse(stdout)
@@ -430,6 +439,52 @@ async function verifyExamples(consumer) {
   )
 }
 
+async function verifyDocumentationExamples(consumer) {
+  const directory = path.join(consumer, 'documentation')
+  await mkdir(directory)
+  for (const { filename, code } of await readDocumentationSnippets(
+    repositoryRoot,
+  ))
+    await writeFile(path.join(directory, filename), code)
+  await writeFile(
+    path.join(directory, 'environment.d.ts'),
+    "declare module '*.css'\n",
+  )
+
+  await writeFile(
+    path.join(consumer, 'tsconfig.documentation.json'),
+    `${JSON.stringify(
+      {
+        compilerOptions: {
+          target: 'ES2022',
+          lib: ['ES2022', 'DOM', 'DOM.Iterable'],
+          module: 'ESNext',
+          moduleResolution: 'Bundler',
+          jsx: 'react-jsx',
+          strict: true,
+          exactOptionalPropertyTypes: true,
+          noUncheckedIndexedAccess: true,
+          noEmit: true,
+          skipLibCheck: false,
+          types: [],
+        },
+        include: ['documentation/**/*.tsx', 'documentation/**/*.d.ts'],
+      },
+      null,
+      2,
+    )}\n`,
+  )
+  await run(
+    process.execPath,
+    [
+      'node_modules/typescript/bin/tsc',
+      '--project',
+      'tsconfig.documentation.json',
+    ],
+    consumer,
+  )
+}
+
 async function verifyStylesAndManifest(consumer, sourceManifest) {
   const require = createRequire(path.join(consumer, 'package.json'))
   const stylesheetPath = require.resolve(`${packageName}/styles.css`)
@@ -446,21 +501,23 @@ async function verifyStylesAndManifest(consumer, sourceManifest) {
   })
 }
 
-async function createNpmPaths(temporaryRoot) {
+export async function createNpmPaths(temporaryRoot) {
   const paths = {
     userConfig: path.join(temporaryRoot, 'user.npmrc'),
     globalConfig: path.join(temporaryRoot, 'global.npmrc'),
     cache: path.join(temporaryRoot, 'npm-cache'),
+    workspace: path.join(temporaryRoot, 'npm-workspace'),
   }
   await Promise.all([
     writeFile(paths.userConfig, ''),
     writeFile(paths.globalConfig, ''),
     mkdir(paths.cache),
+    mkdir(paths.workspace),
   ])
   return paths
 }
 
-function runNpm(args, cwd, npmPaths) {
+export function runNpm(args, cwd, npmPaths) {
   return execFileAsync('npm', args, {
     cwd,
     env: sanitizeNpmEnvironment(process.env, npmPaths),

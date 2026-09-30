@@ -1,7 +1,8 @@
-import { readFile, readdir, access } from 'node:fs/promises'
+import { access, readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { JSDOM } from 'jsdom'
 import ts from 'typescript'
+import { readDocumentationSnippets } from './documentation-snippets.mjs'
 const base = 'https://react-data-inspector.nipesolutions.com'
 const sitemap = await readFile('website/dist/sitemap.xml', 'utf8')
 const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(
@@ -76,19 +77,8 @@ for (const [path, doc] of pages) {
 // Typecheck every RDI documentation example as its own module against public source.
 // Competitor 'before' examples are verified against pinned package APIs in their guides.
 const snippets = new Map()
-for (const file of await readdir('website/docs')) {
-  const source = await readFile(`website/docs/${file}`, 'utf8')
-  let index = 0
-  for (const match of source.matchAll(/```tsx?\n([\s\S]*?)```/g)) {
-    if (
-      /from ['"](?:react18-json-view|react-json-view-lite|@uiw\/react-json-view)['"]/.test(
-        match[1],
-      )
-    )
-      continue
-    snippets.set(resolve(`website/docs/${file}-${index++}.tsx`), match[1])
-  }
-}
+for (const { filename, code } of await readDocumentationSnippets(process.cwd()))
+  snippets.set(resolve(`website/docs/${filename}`), code)
 const options = {
   target: ts.ScriptTarget.ES2022,
   module: ts.ModuleKind.ESNext,

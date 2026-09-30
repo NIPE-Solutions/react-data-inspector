@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import console from 'node:console'
-import { createHash } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import {
   appendFile,
+  link,
   mkdir,
   mkdtemp,
   readFile,
@@ -16,8 +17,9 @@ import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
 import {
+  createNpmPaths,
   formatCommandError,
-  sanitizeNpmEnvironment,
+  runNpm,
   validatePackedFiles,
   verifyTarballConsumers,
 } from './verify-package.mjs'
@@ -225,8 +227,8 @@ export async function verifyRelease({ dryRun = false, outputDirectory } = {}) {
     const npmPaths = await createNpmPaths(workingRoot)
     await mkdir(packDirectory)
     const { stdout } = await runNpm(
-      ['pack', '--json', '--pack-destination', packDirectory],
-      repositoryRoot,
+      ['pack', repositoryRoot, '--json', '--pack-destination', packDirectory],
+      npmPaths.workspace,
       npmPaths,
     )
     const [pack] = JSON.parse(stdout)
@@ -270,15 +272,13 @@ export async function verifyRelease({ dryRun = false, outputDirectory } = {}) {
         release.channel,
         tarballPath,
       ],
-      repositoryRoot,
+      npmPaths.workspace,
       npmPaths,
     )
 
     const manifest = await createArtifactManifest(pack, tarballPath, release)
     const manifestPath = path.join(packDirectory, 'release-manifest.json')
-    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, {
-      flag: 'wx',
-    })
+    await writeArtifactManifest(manifestPath, manifest)
     if (outputDirectory) {
       await writeGitHubOutputs({ tarball: pack.filename })
       console.log(`Verified artifact preserved at ${tarballPath}`)
@@ -292,25 +292,23 @@ export async function verifyRelease({ dryRun = false, outputDirectory } = {}) {
   }
 }
 
-async function createNpmPaths(temporaryRoot) {
-  const paths = {
-    userConfig: path.join(temporaryRoot, 'user.npmrc'),
-    globalConfig: path.join(temporaryRoot, 'global.npmrc'),
-    cache: path.join(temporaryRoot, 'npm-cache'),
+export async function writeArtifactManifest(manifestPath, manifest) {
+  const temporaryPath = `${manifestPath}.${randomUUID()}.tmp`
+  try {
+    await writeFile(temporaryPath, `${JSON.stringify(manifest, null, 2)}\n`, {
+      flag: 'wx',
+    })
+    await link(temporaryPath, manifestPath)
+  } finally {
+    await rm(temporaryPath, { force: true })
   }
-  await Promise.all([
-    writeFile(paths.userConfig, ''),
-    writeFile(paths.globalConfig, ''),
-    mkdir(paths.cache),
-  ])
-  return paths
 }
 
 async function readRegistryVersion(name, version, npmPaths) {
   try {
     const { stdout } = await runNpm(
       ['view', `${name}@${version}`, 'version', '--json'],
-      repositoryRoot,
+      npmPaths.workspace,
       npmPaths,
     )
     const parsed = JSON.parse(stdout)
@@ -334,14 +332,6 @@ async function runVisibleNpm(args, cwd, npmPaths) {
   const { stdout, stderr } = await runNpm(args, cwd, npmPaths)
   if (stdout) process.stdout.write(stdout)
   if (stderr) process.stderr.write(stderr)
-}
-
-function runNpm(args, cwd, npmPaths) {
-  return execFileAsync('npm', args, {
-    cwd,
-    env: sanitizeNpmEnvironment(process.env, npmPaths),
-    maxBuffer: 10 * 1024 * 1024,
-  })
 }
 
 function run(command, args) {
