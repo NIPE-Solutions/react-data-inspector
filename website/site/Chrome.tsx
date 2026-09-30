@@ -2,9 +2,8 @@ import { useState } from 'react'
 export const origin = 'https://react-data-inspector.nipesolutions.com'
 export const repository =
   'https://github.com/NIPE-Solutions/react-data-inspector'
-// Local development uses the first published beta; production resolves npm.
-export const publishedVersion =
-  import.meta.env.VITE_NPM_VERSION || '0.1.0-beta.0'
+// Local development uses the source candidate; deployment resolves npm.
+export const publishedVersion = import.meta.env.VITE_NPM_VERSION || '1.0.0'
 export function Header({ main = 'main' }: { main?: string }) {
   return (
     <>

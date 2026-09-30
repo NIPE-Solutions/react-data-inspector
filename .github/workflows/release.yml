@@ -1,0 +1,191 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-nipe-solutions-react-data-inspector-stable
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.event.release.prerelease == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    outputs:
+      tarball: ${{ steps.release.outputs.tarball }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Require a release from main
+        run: git merge-base --is-ancestor HEAD origin/main
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Audit dependencies
+        run: npm audit --audit-level=moderate
+      - name: Check formatting
+        run: npm run format:check
+      - name: Check types
+        run: npm run typecheck
+      - name: Run unit and component tests
+        run: npm test
+      - name: Check release policy
+        run: npm run test:release-policy
+      - name: Build package
+        run: npm run build
+      - name: Build website
+        run: npm run build:website
+      - name: Verify website
+        run: npm run test:website
+      - name: Install browser engines
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Run browser suite
+        run: npm run test:e2e
+      - name: Verify and preserve release artifact
+        id: release
+        run: npm run release:check -- --dry-run --output release-artifact
+      - name: Run model benchmarks
+        run: npm run benchmark
+      - name: Run model lifetime benchmark
+        run: npm run benchmark:memory
+      - name: Run browser benchmark
+        run: npm run benchmark:browser
+      - name: Upload verified release artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: npm-package-stable
+          path: release-artifact
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: verify
+    environment: npm
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      id-token: write
+    steps:
+      - name: Set up Node.js for trusted publishing
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Download verified release artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: npm-package-stable
+          path: release-artifact
+      - name: Validate and publish verified artifact
+        env:
+          RELEASE_TARBALL: ${{ needs.verify.outputs.tarball }}
+        working-directory: release-artifact
+        run: |
+          set -euo pipefail
+
+          expected_tarball="nipe-solutions-react-data-inspector-1.0.0.tgz"
+          manifest_file="release-manifest.json"
+          if [[ ! "$RELEASE_TARBALL" =~ ^[A-Za-z0-9._-]+$ ]] || [[ "$RELEASE_TARBALL" != "$expected_tarball" ]]; then
+            echo "Unsafe release tarball: expected $expected_tarball" >&2
+            exit 1
+          fi
+
+          shopt -s nullglob dotglob
+          entries=(*)
+          if (( ${#entries[@]} != 2 )); then
+            echo "Artifact must contain only the tarball and release manifest" >&2
+            exit 1
+          fi
+          if [[ ! -f "$RELEASE_TARBALL" ]] || [[ ! -f "$manifest_file" ]]; then
+            echo "Verified tarball or release manifest is missing" >&2
+            exit 1
+          fi
+
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { createHash } from 'node:crypto'
+          import { readFile } from 'node:fs/promises'
+
+          const tarball = process.env.RELEASE_TARBALL
+          const manifest = JSON.parse(await readFile('release-manifest.json', 'utf8'))
+          const expectedFiles = [
+            'LICENSE',
+            'README.md',
+            'dist/index.cjs',
+            'dist/index.d.cts',
+            'dist/index.d.ts',
+            'dist/index.js',
+            'dist/styles.css',
+            'package.json',
+          ]
+          const version = process.env.GITHUB_REF_NAME.replace(/^v/, '')
+          assert.equal(process.env.GITHUB_REF_NAME, `v${version}`)
+          assert.deepEqual(Object.keys(manifest).sort(), [
+            'channel',
+            'filename',
+            'files',
+            'integrity',
+            'name',
+            'sha512',
+            'version',
+          ])
+          assert.equal(manifest.name, '@nipe-solutions/react-data-inspector')
+          assert.equal(manifest.version, version)
+          assert.equal(manifest.version, '1.0.0')
+          assert.equal(manifest.channel, 'latest')
+          assert.equal(manifest.filename, tarball)
+          assert.deepEqual(manifest.files, expectedFiles)
+          assert.match(manifest.sha512, /^[0-9a-f]{128}$/)
+          assert.match(manifest.integrity, /^sha512-[A-Za-z0-9+/]+={0,2}$/)
+
+          const digest = createHash('sha512').update(await readFile(tarball)).digest()
+          assert.equal(manifest.sha512, digest.toString('hex'))
+          assert.equal(manifest.integrity, `sha512-${digest.toString('base64')}`)
+          NODE
+
+          npm publish --ignore-scripts --provenance --access public --tag latest "$RELEASE_TARBALL"
+
+  deploy:
+    name: Deploy released website
+    needs: publish
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      DEPLOY_ENVIRONMENT: production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build published website
+        run: npm run build:website
+        env:
+          REQUIRE_NPM_PUBLICATION: 'true'
+          EXPECTED_NPM_VERSION: '1.0.0'
+      - name: Deploy released website
+        id: deploy
+        run: node scripts/deploy-website.mjs

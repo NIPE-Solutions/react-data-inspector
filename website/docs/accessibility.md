@@ -6,6 +6,6 @@ Selection, keyboard focus, and search matches have distinct states. Search contr
 
 ## Current verification status
 
-Automated keyboard interaction and axe checks have run in Chromium, Firefox, and WebKit, including a 390px layout, RTL, grouping, and virtualized focus. SSR and hydration have been exercised with React 18.3.1 and 19.2.8.
+Automated keyboard interaction and axe checks have run in Chromium, Firefox, and WebKit, including a 390px layout, RTL, grouping, and virtualized focus. SSR and hydration have been exercised with React 18.3.1 and 19.3.0.
 
 These checks do not establish screen-reader compatibility. Manual VoiceOver with Safari and NVDA with Firefox or Chrome have not been completed and remain release-readiness work. Test the exact data shapes, slots, messages, browser versions, and assistive technologies required by your application.

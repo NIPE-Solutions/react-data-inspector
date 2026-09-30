@@ -1,15 +1,17 @@
-# Beta releases
+# Stable releases
 
-The package uses versions such as `0.1.0-beta.0` and the npm `beta` dist-tag. It does not promote prereleases to `latest`.
+Stable versions use the npm `latest` dist-tag. Publication starts from a non-prerelease GitHub Release and uses the reviewed artifact produced by the release workflow; local machines do not publish the package.
 
-1. Update `package.json` and the lockfile with `npm version 0.1.0-beta.N --no-git-tag-version`.
-2. Commit the reviewed change to `main`.
-3. Push a matching tag: `git tag v0.1.0-beta.N` then `git push origin v0.1.0-beta.N`.
+1. Update `package.json`, `package-lock.json`, and `CHANGELOG.md` to the same stable version.
+2. Run `npm run release:check -- --dry-run` and the full verification suite.
+3. Merge the reviewed release commit to `main`.
+4. Publish a GitHub Release whose tag is exactly `v<package version>`, such as `v1.0.0`.
+5. Confirm the Release workflow publishes the package and then deploys the website.
 
-The Verify workflow runs the complete React 18.3.1/19 matrix, including unit, browser, SSR, package and website checks. Its publication job requires the tag to equal the package version, the lockfile to match, the commit to belong to main, and the version to be absent from npm. Publication uses public access, `beta`, and provenance. Existing versions are never overwritten; bump the version for another release.
+The Release workflow requires the release commit to belong to `main`, the GitHub tag to match the package and lockfile versions, the release to be non-prerelease, and the version to be absent from npm. It tests React 18.3.1 and 19.3.0 through CI, reruns the complete release gate, and preserves an exact tarball plus its signed-off manifest. The publishing job downloads only that artifact, validates its name, inventory, version, channel, and SHA-512 digest, then publishes it with public access, `latest`, and provenance. Existing versions are immutable; prepare a new version for every subsequent release.
 
-npm trusted publishing is configured for organization `NIPE-Solutions`, repository `react-data-inspector`, workflow `ci.yml`, environment `npm`, with direct publish allowed. GitHub-hosted runners supply OIDC credentials. The bootstrap credential used for first publication has been retired. Future releases use OIDC without a stored npm token. Never commit credentials.
+npm trusted publishing is configured for organization `NIPE-Solutions`, repository `react-data-inspector`, workflow `release.yml`, and environment `npm`. GitHub-hosted runners obtain short-lived credentials through OIDC. Do not add an npm token or publish a locally built archive.
 
-A successful tag publication is followed by a production website build, which checks npm dist-tag endpoints and displays the real installation command. Deployment retries briefly while the registry propagates a new package, then fails rather than deploying unpublished-package copy. Failed publication blocks that release deployment. Ordinary main pushes continue to deploy verified website updates without publishing a package.
+After npm accepts the artifact, the workflow rebuilds the production website against registry metadata and deploys it. Registry propagation is retried for a bounded period; publication or metadata verification failures prevent deployment. Ordinary verified branch pushes continue to deploy website updates without publishing a package.
 
-The beta channel is a release designation. It does not imply that the manual screen-reader, current mobile Safari, dogfooding and retained-browser-heap audits in [release readiness](release-readiness.md) are complete.
+Stable describes the documented API and compatibility contract. Human screen-reader, current mobile Safari, application dogfooding, and retained-browser-heap audits remain explicit adopter qualification work in [release readiness](release-readiness.md).

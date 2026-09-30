@@ -1,12 +1,12 @@
 {
   "name": "@nipe-solutions/react-data-inspector",
-  "version": "0.1.0-beta.0",
+  "version": "1.0.0",
   "description": "A structured JavaScript data inspector for React.",
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NIPE-Solutions/react-data-inspector"
+    "url": "git+https://github.com/NIPE-Solutions/react-data-inspector.git"
   },
   "files": [
     "dist",
@@ -36,7 +36,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "beta",
+    "tag": "latest",
     "provenance": true
   },
   "scripts": {
@@ -47,15 +47,17 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:package": "node scripts/verify-package.mjs",
+    "test:release-policy": "node --test scripts/*.test.mjs",
     "benchmark": "tsx benchmarks/run.ts",
-    "check": "npm run format:check && npm run typecheck && npm test && npm run build && npm run build:website && npm run test:website && npm run test:package",
+    "check": "npm run format:check && npm run typecheck && npm test && npm run test:release-policy && npm run build && npm run build:website && npm run test:website && npm run test:package",
     "benchmark:memory": "node --expose-gc --import tsx benchmarks/memory.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "benchmark:browser": "node benchmarks/browser.mjs",
     "build:website:profile": "vite build --config website/vite.config.ts --mode profiling",
     "preview:website": "vite preview --config website/vite.config.ts --host 127.0.0.1 --port 5173 --strictPort",
-    "test:website": "node scripts/verify-website.mjs"
+    "test:website": "node scripts/verify-website.mjs",
+    "release:check": "node scripts/validate-release.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
@@ -63,18 +65,19 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^24.0.0",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "dts-bundle-generator": "9.5.1",
     "jsdom": "^27.0.0",
     "marked": "^18.0.11",
     "prettier": "3.9.6",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "tsx": "^4.20.0",
     "typescript": "~6.0.3",
     "vite": "^8.2.2",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.0",
+    "yaml": "2.9.1"
   },
   "prettier": {
     "semi": false,
