@@ -51,12 +51,11 @@ for (const phrase of [
   if (renderedText.includes(phrase))
     throw Error(`Current-beta copy remains in the stable website: ${phrase}`)
 }
-if (
-  !renderedText.includes(
-    'npm install @nipe-solutions/react-data-inspector@1.0.0',
-  )
-)
-  throw Error('Stable installation command is missing its concrete version')
+const stableInstallCommand = 'npm install @nipe-solutions/react-data-inspector'
+if (!renderedText.includes(stableInstallCommand))
+  throw Error('Stable installation command is missing')
+if (renderedText.includes(`${stableInstallCommand}@1.0.0`))
+  throw Error('Stable installation command must follow the latest release')
 for (const [path, doc] of pages) {
   for (const anchor of doc.querySelectorAll('a[href]')) {
     const href = anchor.getAttribute('href')

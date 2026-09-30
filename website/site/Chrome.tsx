@@ -82,7 +82,7 @@ export function Installation({ compact = false }: { compact?: boolean }) {
   return (
     <div className={compact ? 'installation compact-install' : 'installation'}>
       <p>Available on npm · {publishedVersion}</p>
-      <Code>{`npm install @nipe-solutions/react-data-inspector@${publishedVersion}`}</Code>
+      <Code>npm install @nipe-solutions/react-data-inspector</Code>
       {compact && (
         <a className="install-link" href="/docs/installation">
           Installation and CSS setup
