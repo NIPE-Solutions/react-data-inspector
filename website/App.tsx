@@ -133,8 +133,8 @@ export function App() {
             </a>
           </div>
           <p className="annotation">
-            Beta. Inspection core available; editing and manual accessibility
-            audits remain ahead.{' '}
+            Stable inspection API; editing remains out of scope and manual
+            accessibility qualification is documented.{' '}
             <a href="/limitations">Read the limitations.</a>
           </p>
         </section>

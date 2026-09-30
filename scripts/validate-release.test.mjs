@@ -45,6 +45,27 @@ test('stable metadata selects the latest channel', () => {
   )
 })
 
+test('repository metadata satisfies stable release policy', async () => {
+  const [packageJson, packageLock, changelog] = await Promise.all([
+    readFile(path.join(repositoryRoot, 'package.json'), 'utf8').then(
+      JSON.parse,
+    ),
+    readFile(path.join(repositoryRoot, 'package-lock.json'), 'utf8').then(
+      JSON.parse,
+    ),
+    readFile(path.join(repositoryRoot, 'CHANGELOG.md'), 'utf8'),
+  ])
+
+  assert.deepEqual(
+    validateReleaseMetadata(packageJson, packageLock, changelog),
+    {
+      name: stablePackage.name,
+      version: '1.0.0',
+      channel: 'latest',
+    },
+  )
+})
+
 test('stable metadata rejects invalid versions and release policy', () => {
   for (const version of ['1.0.0-beta.1', 'v1.0.0', '01.0.0', '1.0']) {
     assert.throws(

@@ -74,9 +74,8 @@ export function Validation() {
       <p>
         Actual screen-reader behavior, current Safari/mobile Safari,
         representative application integration and retained browser heaps still
-        need recorded validation. The package is distributed on the beta
-        channel; that does not certify every integration or assistive
-        technology.
+        need recorded validation. A stable API does not certify every
+        integration, browser, device, or assistive technology.
       </p>
     </>
   )

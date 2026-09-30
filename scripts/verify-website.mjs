@@ -37,6 +37,25 @@ for (const url of urls) {
 }
 if (new Set([...pages.values()].map((doc) => doc.title)).size !== pages.size)
   throw Error('Duplicate page titles')
+const renderedText = [...pages.values()]
+  .map((doc) => doc.body.textContent ?? '')
+  .join('\n')
+for (const phrase of [
+  'Beta preview',
+  'Beta. Inspection core',
+  'This is an beta release',
+  'current beta',
+  'distributed on the beta channel',
+]) {
+  if (renderedText.includes(phrase))
+    throw Error(`Current-beta copy remains in the stable website: ${phrase}`)
+}
+if (
+  !renderedText.includes(
+    'npm install @nipe-solutions/react-data-inspector@1.0.0',
+  )
+)
+  throw Error('Stable installation command is missing its concrete version')
 for (const [path, doc] of pages) {
   for (const anchor of doc.querySelectorAll('a[href]')) {
     const href = anchor.getAttribute('href')

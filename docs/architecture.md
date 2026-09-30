@@ -45,7 +45,7 @@ Built-in subclasses are identified through bounded prototype descriptor inspecti
 
 The labelled tree owns nested treeitems and groups. Items have explicit level, position and sibling count. The tree itself is the navigation tab stop and uses aria-activedescendant pointing to a mounted item. Focus is independent of selection. Collapsing or removing a focused descendant falls back to a surviving ancestor. Keyboard controls include arrows, Home/End, type-ahead, Enter activation (toggle a branch, follow a reference, or select a leaf), Space selection, and F2 actions. Clicking reference text reveals and selects its original; the action menu provides the same jump. Search Enter advances and Shift+Enter moves backwards.
 
-Search controls and the current-node action panel are outside the tree. They use normal buttons, status regions and form controls. Custom content slots retain library-owned tree and toggle semantics. Uniform measured rows support bounded windowing; custom variable-height rows require disabling virtualization. The public-beta gate includes actual screen-reader testing; axe alone cannot establish this.
+Search controls and the current-node action panel are outside the tree. They use normal buttons, status regions and form controls. Custom content slots retain library-owned tree and toggle semantics. Uniform measured rows support bounded windowing; custom variable-height rows require disabling virtualization. Human screen-reader testing remains adopter qualification; axe alone cannot establish compatibility.
 
 ## Security and SSR
 
@@ -57,7 +57,7 @@ SSR performs no browser-global access. React useId prevents cross-instance ID co
 
 ## Roadmap
 
-Before public beta: manual assistive technology audit, real application integration, stronger memory/performance evidence, uniform-row windowing audit and resolution of any remaining correctness defects. Then primitive immutable editing proposals, collection continuation beyond the current cap, and explicit extra-array-property discovery. JSON Patch helpers, worker search, prototype views, hex mode and diffing require separate justification. No AI features or JavaScript evaluator.
+Future work may include primitive immutable editing proposals, collection continuation beyond the current cap, and explicit extra-array-property discovery. JSON Patch helpers, worker search, prototype views, hex mode, and diffing require separate design and justification. Human assistive-technology audits, real application integration, and physical-device measurements remain adopter qualification rather than feature claims.
 
 ## Search during updates
 

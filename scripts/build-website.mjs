@@ -2,11 +2,13 @@ import { spawnSync } from 'node:child_process'
 import { mkdir, readFile, writeFile, copyFile, rm } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-// Resolve dist-tags directly: the package document can retain a cached 404
-// briefly after first publication even when version endpoints are available.
 const requiredPublication = process.env.REQUIRE_NPM_PUBLICATION === 'true'
-let version = ''
-for (let attempt = 0; attempt < (requiredPublication ? 6 : 1); attempt++) {
+const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
+// Local and verification builds describe their source candidate. Deployment
+// builds resolve npm directly and refuse installation copy for an unpublished
+// version. The existing beta is a bridge only until the first stable publish.
+let version = requiredPublication ? '' : packageJson.version
+for (let attempt = 0; attempt < (requiredPublication ? 6 : 0); attempt++) {
   for (const tag of ['latest', 'beta']) {
     const response = await fetch(
       `https://registry.npmjs.org/@nipe-solutions%2freact-data-inspector/${tag}`,

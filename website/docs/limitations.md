@@ -11,4 +11,4 @@
 
 The component does not edit values, add or remove properties, emit JSON Patch, inspect prototypes, evaluate JavaScript, render schema forms, or diff snapshots. Default copying rejects graph semantics or values that cannot be represented without loss. Row virtualization assumes a uniform measured height.
 
-Automated tests cover keyboard behavior, axe, SSR, hydration, and React 18.3.1 and 19.2.8. Manual screen-reader audits, current mobile Safari validation, mounted-browser heap analysis, and production application dogfooding are still outstanding.
+Automated tests cover keyboard behavior, axe, SSR, hydration, and React 18.3.1 and 19.3.0. Manual screen-reader audits, current mobile Safari validation, mounted-browser heap analysis, and production application dogfooding are still outstanding.

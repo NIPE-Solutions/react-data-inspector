@@ -26,4 +26,4 @@ import { DataInspector } from '@nipe-solutions/react-data-inspector'
 const html = renderToString(<DataInspector value={{ status: 'ready' }} />)
 ```
 
-Hydration still follows normal React rules: provide equivalent input, controlled paths, messages, and custom type definitions on server and client. Browser-only slot code or callbacks can make your integration unsafe for SSR even though the built-in component is safe. Automated SSR and hydration checks cover React 18.3.1 and 19.2.8; this is not a claim about every framework's streaming or server-component boundary.
+Hydration still follows normal React rules: provide equivalent input, controlled paths, messages, and custom type definitions on server and client. Browser-only slot code or callbacks can make your integration unsafe for SSR even though the built-in component is safe. Automated SSR and hydration checks cover React 18.3.1 and 19.3.0; this is not a claim about every framework's streaming or server-component boundary.

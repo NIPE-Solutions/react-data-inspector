@@ -13,7 +13,7 @@ The website uses the `react-data-inspector` project in the NIPE Solutions Vercel
 
 The GitHub `VERCEL_TOKEN` secret is scoped to this project and expires on 2027-09-07. Rotate it before expiry through Vercel and update the GitHub secret. `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are repository variables. Optional diagnostic artifact uploads are non-blocking when GitHub storage is unavailable; tests, builds and packaging remain required.
 
-Version-tag builds publish the beta npm package after both React matrix jobs pass, then deploy the website. Ordinary branch pushes deploy the site without publishing packages. Application secrets are unnecessary for this static site. Keep `.vercel/` local and ignored.
+Publishing a non-prerelease GitHub Release runs the separate Release workflow, which verifies and publishes the stable npm artifact before deploying registry-backed website copy. Ordinary branch pushes deploy the site without publishing packages, and tag pushes do not deploy through CI. Application secrets are unnecessary for this static site. Keep `.vercel/` local and ignored.
 
 ## Domain
 
