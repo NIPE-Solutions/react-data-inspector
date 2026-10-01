@@ -1,6 +1,65 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
+for (const width of [1280, 390, 320]) {
+  test(`homepage support links remain usable at ${width}px`, async ({
+    page,
+    browserName,
+  }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/')
+    const support = page.getByRole('region', {
+      name: 'Useful in your project?',
+    })
+    await expect(support).toBeVisible()
+    expect(
+      await support.evaluate((node) => node.previousElementSibling?.id),
+    ).toBe('in-products')
+    const star = support.getByRole('link', {
+      name: 'Star on GitHub',
+      exact: true,
+    })
+    const explore = support.getByRole('link', {
+      name: 'Explore NIPE Open Source',
+      exact: true,
+    })
+    await expect(star).toHaveAttribute(
+      'href',
+      'https://github.com/NIPE-Solutions/react-data-inspector',
+    )
+    await expect(explore).toHaveAttribute(
+      'href',
+      'https://opensource.nipesolutions.com',
+    )
+    for (const link of [star, explore]) {
+      const bounds = await link.boundingBox()
+      expect(bounds!.height).toBeGreaterThanOrEqual(44)
+      expect(bounds!.width).toBeGreaterThanOrEqual(44)
+      expect(bounds!.x).toBeGreaterThanOrEqual(0)
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width)
+      expect(await link.evaluate((node) => node.tagName)).toBe('A')
+    }
+    await star.focus()
+    // macOS Safari navigates native links with Option+Tab.
+    const tab =
+      browserName === 'webkit' && process.platform === 'darwin'
+        ? 'Alt+Tab'
+        : 'Tab'
+    await page.keyboard.press(tab)
+    await expect(explore).toBeFocused()
+    await page.keyboard.press(`Shift+${tab}`)
+    await expect(star).toBeFocused()
+    expect(
+      await star.evaluate((node) => getComputedStyle(node).outlineStyle),
+    ).not.toBe('none')
+    if (process.env.CTA_SCREENSHOT_DIR) {
+      await support.screenshot({
+        path: `${process.env.CTA_SCREENSHOT_DIR}/${test.info().project.name}-${width}.png`,
+      })
+    }
+  })
+}
+
 test('homepage proofs use actual values and safe inspection', async ({
   page,
 }) => {
@@ -95,6 +154,9 @@ test('static pages hydrate without errors and documentation links work', async (
   ]) {
     await page.goto(route)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    await expect(
+      page.getByRole('region', { name: 'Useful in your project?' }),
+    ).toHaveCount(route === '/' ? 1 : 0)
     if (route === '/')
       await page.getByRole('button', { name: 'Classic', exact: true }).click()
   }
