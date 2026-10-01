@@ -597,6 +597,9 @@ footer nav {
   .hero {
     grid-template-columns: 1fr;
   }
+  .onward .hero-links {
+    flex-wrap: wrap;
+  }
   .hero h1 {
     font-size: clamp(38px, 9vw, 52px);
   }

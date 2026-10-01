@@ -1,6 +1,39 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
+for (const initialWidth of [320, 1440]) {
+  test(`homepage fits 320px after loading at ${initialWidth}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: initialWidth, height: 1000 })
+    await page.goto('/')
+    const support = page.getByRole('region', {
+      name: 'Useful in your project?',
+      exact: true,
+    })
+    await support.scrollIntoViewIfNeeded()
+    for (const name of ['Star on GitHub', 'Explore NIPE Open Source']) {
+      await support.getByRole('link', { name, exact: true }).focus()
+    }
+    await page.setViewportSize({ width: 320, height: 1000 })
+    await support.scrollIntoViewIfNeeded()
+    for (const name of ['Star on GitHub', 'Explore NIPE Open Source']) {
+      await support.getByRole('link', { name, exact: true }).focus()
+    }
+    const layout = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      scroll: document.documentElement.scrollWidth,
+    }))
+    expect(layout.viewport).toBe(320)
+    expect(layout.scroll).toBeLessThanOrEqual(layout.viewport)
+    if (process.env.CTA_SCREENSHOT_DIR) {
+      await page.locator('.onward').screenshot({
+        path: `${process.env.CTA_SCREENSHOT_DIR}/onward-${initialWidth}-to-320-${test.info().project.name}.png`,
+      })
+    }
+  })
+}
+
 for (const width of [1280, 390, 320]) {
   test(`homepage support links remain usable at ${width}px`, async ({
     page,
