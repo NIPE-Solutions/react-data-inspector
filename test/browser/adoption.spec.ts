@@ -30,7 +30,9 @@ test('homepage directs JSON experiments to playground and exposes legal and comm
   await page.goto('/')
   await expect(page.getByLabel('JSON input', { exact: true })).toHaveCount(0)
   await expect(
-    page.getByRole('link', { name: '★ Star React Data Inspector on GitHub ↗' }),
+    page
+      .getByRole('region', { name: 'Useful in your project?', exact: true })
+      .getByRole('link', { name: 'Star on GitHub', exact: true }),
   ).toHaveAttribute(
     'href',
     'https://github.com/NIPE-Solutions/react-data-inspector',
