@@ -76,6 +76,36 @@ export function App() {
         <CustomizationWorkshop />
         <Ownership />
         <Products />
+        <section
+          className="section community"
+          aria-labelledby="support-heading"
+        >
+          <h2 id="support-heading">Useful in your project?</h2>
+          <div>
+            <p>
+              If React Data Inspector helps you make sense of your data, a
+              GitHub star helps other developers discover it. Explore more tools
+              from NIPE Open Source for your next project.
+            </p>
+            <div className="support-links">
+              <a
+                className="primary"
+                href="https://github.com/NIPE-Solutions/react-data-inspector"
+              >
+                Star on GitHub
+              </a>
+              <a href="https://opensource.nipesolutions.com">
+                Explore NIPE Open Source
+              </a>
+            </div>
+            <p className="annotation">
+              Have a real-world edge case?{' '}
+              <a href="https://github.com/NIPE-Solutions/react-data-inspector/issues">
+                Bring it to the issue tracker.
+              </a>
+            </p>
+          </div>
+        </section>
         <aside className="keyboard-proof" aria-label="Accessibility evidence">
           <h2>Keep your keyboard.</h2>
           <p>
@@ -88,31 +118,6 @@ export function App() {
           </p>
           <a href="/accessibility">Keyboard model and audit status →</a>
         </aside>
-        <section className="section community">
-          <h2>
-            Like where this is going?
-            <br />
-            Help it grow.
-          </h2>
-          <div>
-            <p>
-              React Data Inspector is free, open source, and we're only getting
-              started. Give it a star and help more developers find it.
-            </p>
-            <a
-              className="star-link"
-              href="https://github.com/NIPE-Solutions/react-data-inspector"
-            >
-              ★ Star React Data Inspector on GitHub ↗
-            </a>
-            <p className="annotation">
-              Have a real-world edge case?{' '}
-              <a href="https://github.com/NIPE-Solutions/react-data-inspector/issues">
-                Bring it to the issue tracker.
-              </a>
-            </p>
-          </div>
-        </section>
         <section className="section onward" id="docs">
           <h2>
             A focused primitive.

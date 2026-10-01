@@ -820,10 +820,17 @@ html {
 .community p {
   max-width: 60ch;
 }
-.star-link {
-  display: inline-block;
-  font-weight: 600;
-  margin-block: 12px;
+.support-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+}
+.support-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 18px;
 }
 .doc-article > p,
 .doc-article > ul,
